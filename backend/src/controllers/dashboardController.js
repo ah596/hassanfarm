@@ -2,13 +2,13 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { collectionRefs } from '../services/firestore.js';
 import { buildSummary, monthKey, toNumber } from '../utils/calculations.js';
 
-async function fetchAll() {
+async function fetchAll(userId) {
   const [animals, expenses, feed, medicine, sales] = await Promise.all([
-    collectionRefs.animals().get(),
-    collectionRefs.expenses().get(),
-    collectionRefs.feed().get(),
-    collectionRefs.medicine().get(),
-    collectionRefs.sales().get()
+    collectionRefs.animals().where('userId', '==', userId).get(),
+    collectionRefs.expenses().where('userId', '==', userId).get(),
+    collectionRefs.feed().where('userId', '==', userId).get(),
+    collectionRefs.medicine().where('userId', '==', userId).get(),
+    collectionRefs.sales().where('userId', '==', userId).get()
   ]);
 
   return {
@@ -21,7 +21,7 @@ async function fetchAll() {
 }
 
 export const getDashboard = asyncHandler(async (req, res) => {
-  const data = await fetchAll();
+  const data = await fetchAll(req.user.uid);
   const summary = buildSummary(data.animals, data.expenses, data.sales, data.feed, data.medicine);
 
   const buckets = {

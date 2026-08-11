@@ -6,11 +6,11 @@ const toDoc = doc => ({ id: doc.id, ...doc.data() });
 
 export const profitReport = asyncHandler(async (req, res) => {
   const [animalsSnap, expensesSnap, feedSnap, medicineSnap, salesSnap] = await Promise.all([
-    collectionRefs.animals().get(),
-    collectionRefs.expenses().get(),
-    collectionRefs.feed().get(),
-    collectionRefs.medicine().get(),
-    collectionRefs.sales().get()
+    collectionRefs.animals().where('userId', '==', req.user.uid).get(),
+    collectionRefs.expenses().where('userId', '==', req.user.uid).get(),
+    collectionRefs.feed().where('userId', '==', req.user.uid).get(),
+    collectionRefs.medicine().where('userId', '==', req.user.uid).get(),
+    collectionRefs.sales().where('userId', '==', req.user.uid).get()
   ]);
 
   const summary = buildSummary(
@@ -43,11 +43,11 @@ export const profitReport = asyncHandler(async (req, res) => {
 
 export const salesReport = asyncHandler(async (req, res) => {
   const [salesSnap, animalsSnap, expensesSnap, feedSnap, medicineSnap] = await Promise.all([
-    collectionRefs.sales().get(),
-    collectionRefs.animals().get(),
-    collectionRefs.expenses().get(),
-    collectionRefs.feed().get(),
-    collectionRefs.medicine().get()
+    collectionRefs.sales().where('userId', '==', req.user.uid).get(),
+    collectionRefs.animals().where('userId', '==', req.user.uid).get(),
+    collectionRefs.expenses().where('userId', '==', req.user.uid).get(),
+    collectionRefs.feed().where('userId', '==', req.user.uid).get(),
+    collectionRefs.medicine().where('userId', '==', req.user.uid).get()
   ]);
   const animals = animalsSnap.docs.map(toDoc);
   const expenses = expensesSnap.docs.map(toDoc);
@@ -72,8 +72,8 @@ export const salesReport = asyncHandler(async (req, res) => {
 
 export const expenseReport = asyncHandler(async (req, res) => {
   const [expensesSnap, animalsSnap] = await Promise.all([
-    collectionRefs.expenses().get(),
-    collectionRefs.animals().get()
+    collectionRefs.expenses().where('userId', '==', req.user.uid).get(),
+    collectionRefs.animals().where('userId', '==', req.user.uid).get()
   ]);
   const animalsById = new Map(animalsSnap.docs.map(doc => [doc.data().animalId, doc.data()]));
   const rows = expensesSnap.docs.map(doc => {
@@ -92,11 +92,11 @@ export const expenseReport = asyncHandler(async (req, res) => {
 
 export const monthlyProfitReport = asyncHandler(async (req, res) => {
   const [animalsSnap, expensesSnap, feedSnap, medicineSnap, salesSnap] = await Promise.all([
-    collectionRefs.animals().get(),
-    collectionRefs.expenses().get(),
-    collectionRefs.feed().get(),
-    collectionRefs.medicine().get(),
-    collectionRefs.sales().get()
+    collectionRefs.animals().where('userId', '==', req.user.uid).get(),
+    collectionRefs.expenses().where('userId', '==', req.user.uid).get(),
+    collectionRefs.feed().where('userId', '==', req.user.uid).get(),
+    collectionRefs.medicine().where('userId', '==', req.user.uid).get(),
+    collectionRefs.sales().where('userId', '==', req.user.uid).get()
   ]);
 
   const rows = {};

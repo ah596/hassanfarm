@@ -37,7 +37,7 @@ const withBreedingStatus = record => {
 };
 
 export const listAnimals = asyncHandler(async (req, res) => {
-  const snapshot = await collectionRefs.animals().orderBy('createdAt', 'desc').get();
+  const snapshot = await collectionRefs.animals().where('userId', '==', req.user.uid).get();
   let animals = snapshot.docs.map(toAnimal);
   const { q, type, gender, status, breed, sortBy = 'createdAt', order = 'desc' } = req.query;
 
@@ -73,6 +73,9 @@ export const getAnimal = asyncHandler(async (req, res) => {
   }
 
   const animal = animalDoc.data();
+  if (animal.userId && animal.userId !== req.user.uid) {
+    throw new AppError('Not authorized', 403);
+  }
   const [expensesSnap, feedSnap, medicineSnap, saleSnap] = await Promise.all([
     collectionRefs.expenses().where('animalId', '==', animal.animalId).get(),
     collectionRefs.feed().where('animalId', '==', animal.animalId).get(),
@@ -106,6 +109,8 @@ export const recordBreeding = asyncHandler(async (req, res) => {
   if (!animalDoc.exists) throw new AppError('Animal not found', 404);
 
   const animal = animalDoc.data();
+  if (animal.userId && animal.userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
   if (animal.gender !== 'Female' || !GESTATION_DAYS[animal.type]) {
     throw new AppError('Breeding records are available only for female cows and goats', 400);
   }
@@ -131,6 +136,9 @@ export const recordBreeding = asyncHandler(async (req, res) => {
 export const recordBirth = asyncHandler(async (req, res) => {
   const animalDoc = await collectionRefs.animals().doc(req.params.id).get();
   if (!animalDoc.exists) throw new AppError('Animal not found', 404);
+  
+  if (animalDoc.data().userId && animalDoc.data().userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
   const payload = birthSchema.parse(req.body);
   const actualBirthDate = dateOnly(payload.actualBirthDate);
   if (!actualBirthDate) throw new AppError('Invalid birth date', 400);
@@ -168,6 +176,7 @@ export const createAnimal = asyncHandler(async (req, res) => {
     createdAt,
     updatedAt: createdAt,
     status: payload.status || 'Available',
+    userId: req.user.uid,
     purchasedBy: req.user.uid
   };
 
@@ -180,6 +189,8 @@ export const updateAnimal = asyncHandler(async (req, res) => {
   if (!existingDoc.exists) throw new AppError('Animal not found', 404);
 
   const existing = existingDoc.data();
+  if (existing.userId && existing.userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
   const incoming = animalSchema.partial().parse(req.body);
   const updates = {
     ...incoming,
@@ -210,6 +221,8 @@ export const updateAnimal = asyncHandler(async (req, res) => {
 export const deleteAnimal = asyncHandler(async (req, res) => {
   const existingDoc = await collectionRefs.animals().doc(req.params.id).get();
   if (!existingDoc.exists) throw new AppError('Animal not found', 404);
+  if (existingDoc.data().userId && existingDoc.data().userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
   await collectionRefs.animals().doc(req.params.id).delete();
   res.json({ message: 'Animal deleted' });
 });
@@ -219,6 +232,8 @@ export const animalSummary = asyncHandler(async (req, res) => {
   if (!animalDoc.exists) throw new AppError('Animal not found', 404);
 
   const animal = animalDoc.data();
+  if (animal.userId && animal.userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
   const [expensesSnap, feedSnap, medicineSnap, saleSnap] = await Promise.all([
     collectionRefs.expenses().where('animalId', '==', animal.animalId).get(),
     collectionRefs.feed().where('animalId', '==', animal.animalId).get(),

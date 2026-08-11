@@ -8,8 +8,14 @@ import { safeDate } from '../utils/calculations.js';
 const toDoc = doc => ({ id: doc.id, ...doc.data() });
 
 export const listSales = asyncHandler(async (req, res) => {
-  const snap = await collectionRefs.sales().orderBy('saleDate', 'desc').get();
-  res.json({ sales: snap.docs.map(toDoc) });
+  const snap = await collectionRefs.sales().where('userId', '==', req.user.uid).get();
+  const sales = snap.docs.map(toDoc);
+  sales.sort((a, b) => {
+    const d1 = new Date(a.saleDate).getTime() || 0;
+    const d2 = new Date(b.saleDate).getTime() || 0;
+    return d2 - d1;
+  });
+  res.json({ sales });
 });
 
 export const createSale = asyncHandler(async (req, res) => {
@@ -22,6 +28,8 @@ export const createSale = asyncHandler(async (req, res) => {
 
   const animalDoc = animalQuery.docs[0];
   const animal = animalDoc.data();
+  if (animal.userId && animal.userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
   if (animal.status === 'Sold') {
     throw new AppError('Animal already sold', 400);
   }
@@ -41,6 +49,7 @@ export const createSale = asyncHandler(async (req, res) => {
     saleId: id,
     ...payload,
     saleDate: saleDate.toISOString(),
+    userId: req.user.uid,
     createdAt: new Date().toISOString()
   };
 
@@ -59,6 +68,7 @@ export const createSale = asyncHandler(async (req, res) => {
 export const updateSale = asyncHandler(async (req, res) => {
   const existing = await collectionRefs.sales().doc(req.params.id).get();
   if (!existing.exists) throw new AppError('Sale not found', 404);
+  if (existing.data().userId && existing.data().userId !== req.user.uid) throw new AppError('Not authorized', 403);
   const payload = saleSchema.partial().parse(req.body);
   await collectionRefs.sales().doc(req.params.id).set(payload, { merge: true });
   const updated = await collectionRefs.sales().doc(req.params.id).get();
@@ -69,6 +79,7 @@ export const deleteSale = asyncHandler(async (req, res) => {
   const existing = await collectionRefs.sales().doc(req.params.id).get();
   if (!existing.exists) throw new AppError('Sale not found', 404);
   const sale = existing.data();
+  if (sale.userId && sale.userId !== req.user.uid) throw new AppError('Not authorized', 403);
   const animalQuery = await collectionRefs.animals().where('animalId', '==', sale.animalId).limit(1).get();
   if (!animalQuery.empty) {
     await collectionRefs.animals().doc(animalQuery.docs[0].id).set({
