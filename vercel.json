@@ -19,8 +19,12 @@
       "destination": "/backend/src/app.js"
     },
     {
-      "source": "/(.*)",
+      "source": "/(assets/.*|.*\\.[a-zA-Z0-9]+)",
       "destination": "/frontend/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/index.html"
     }
   ]
 }
