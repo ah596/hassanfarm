@@ -1,0 +1,12 @@
+{
+  "name": "goat-farm-management",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "echo \"Run npm run dev in backend and frontend separately\"",
+    "build": "echo \"Build frontend and backend separately after installing dependencies\""
+  }
+}

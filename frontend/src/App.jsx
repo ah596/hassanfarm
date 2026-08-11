@@ -1,0 +1,55 @@
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { AppLayout } from './components/Layout';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Animals from './pages/Animals';
+import AddAnimal from './pages/AddAnimal';
+import AnimalDetails from './pages/AnimalDetails';
+import Expenses from './pages/Expenses';
+import Feed from './pages/Feed';
+import Medicine from './pages/Medicine';
+import Sales from './pages/Sales';
+import ProfitCalculator from './pages/ProfitCalculator';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Pregnancy from './pages/Pregnancy';
+
+function Protected({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="p-10 text-center text-[#B3B3B3]">Loading session...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+}
+
+function HomeRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={user ? '/' : '/login'} replace />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Protected><AppLayout /></Protected>}>
+          <Route index element={<Dashboard />} />
+          <Route path="animals" element={<Animals />} />
+          <Route path="animals/new" element={<AddAnimal />} />
+          <Route path="animals/:id" element={<AnimalDetails />} />
+          <Route path="pregnancy" element={<Pregnancy />} />
+          <Route path="expenses" element={<Expenses />} />
+          <Route path="feed" element={<Feed />} />
+          <Route path="medicine" element={<Medicine />} />
+          <Route path="sales" element={<Sales />} />
+          <Route path="profit-calculator" element={<ProfitCalculator />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<HomeRedirect />} />
+      </Routes>
+    </AuthProvider>
+  );
+}
