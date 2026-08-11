@@ -17,7 +17,8 @@ const initial = {
   sellerContact: '',
   status: 'Available',
   notes: '',
-  image: ''
+  image: '',
+  isSelfBreed: false
 };
 
 export default function AddAnimal() {
@@ -59,10 +60,27 @@ export default function AddAnimal() {
           <Input label="Color" value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} />
           <Input label="Weight" type="number" min="0" step="0.01" value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })} required />
           <Input label="Date of Birth" type="date" value={form.dob} onChange={e => setForm({ ...form, dob: e.target.value })} />
-          <Input label="Purchase Date" type="date" value={form.purchaseDate} onChange={e => setForm({ ...form, purchaseDate: e.target.value })} required />
-          <Input label="Purchase Price" type="number" min="0" value={form.purchasePrice} onChange={e => setForm({ ...form, purchasePrice: e.target.value })} required />
-          <Input label="Seller Name" value={form.sellerName} onChange={e => setForm({ ...form, sellerName: e.target.value })} />
-          <Input label="Seller Contact" value={form.sellerContact} onChange={e => setForm({ ...form, sellerContact: e.target.value })} />
+          
+          <div className="md:col-span-2 flex items-center space-x-2 my-2">
+            <input 
+              type="checkbox" 
+              id="isSelfBreed" 
+              className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600" 
+              checked={form.isSelfBreed} 
+              onChange={e => setForm({ ...form, isSelfBreed: e.target.checked })} 
+            />
+            <label htmlFor="isSelfBreed" className="text-sm font-medium text-gray-700">Self Breed (Born on farm)</label>
+          </div>
+
+          {!form.isSelfBreed && (
+            <>
+              <Input label="Purchase Date" type="date" value={form.purchaseDate} onChange={e => setForm({ ...form, purchaseDate: e.target.value })} required />
+              <Input label="Purchase Price" type="number" min="0" value={form.purchasePrice} onChange={e => setForm({ ...form, purchasePrice: e.target.value })} required />
+              <Input label="Seller Name" value={form.sellerName} onChange={e => setForm({ ...form, sellerName: e.target.value })} />
+              <Input label="Seller Contact" value={form.sellerContact} onChange={e => setForm({ ...form, sellerContact: e.target.value })} />
+            </>
+          )}
+
           <Select label="Status" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
             <option>Available</option>
             <option>Sold</option>
