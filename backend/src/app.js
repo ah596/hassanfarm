@@ -25,14 +25,16 @@ app.get('/health', (req, res) => {
   res.json({ ok: true, service: 'goat-farm-api' });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/animals', animalRoutes);
-app.use('/api/expenses', expenseRoutes);
-app.use('/api/feed', feedRoutes);
-app.use('/api/medicine', medicineRoutes);
-app.use('/api/sales', saleRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/reports', reportRoutes);
+// Vercel Services removes the /api route prefix before forwarding requests.
+// Keeping both paths also preserves the local API URL (http://localhost:5000/api).
+app.use(['/api/auth', '/auth'], authRoutes);
+app.use(['/api/animals', '/animals'], animalRoutes);
+app.use(['/api/expenses', '/expenses'], expenseRoutes);
+app.use(['/api/feed', '/feed'], feedRoutes);
+app.use(['/api/medicine', '/medicine'], medicineRoutes);
+app.use(['/api/sales', '/sales'], saleRoutes);
+app.use(['/api/dashboard', '/dashboard'], dashboardRoutes);
+app.use(['/api/reports', '/reports'], reportRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
