@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
 import { Button, Card, Input, SectionHeader, Table, Textarea } from '../components/ui';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const initial = { animalId: '', saleDate: '', salePrice: '', buyerName: '', buyerContact: '', saleWeight: '', pricePerKg: '', notes: '' };
 
@@ -17,15 +19,26 @@ export default function Sales() {
 
   const submit = async e => {
     e.preventDefault();
-    await api.post('/sales', form);
-    setForm(initial);
-    load();
+    try {
+      await api.post('/sales', form);
+      toast.success('Sale recorded successfully!');
+      setForm(initial);
+      load();
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   const remove = async id => {
-    if (!window.confirm('Delete this sale record?')) return;
-    await api.delete(`/sales/${id}`);
-    load();
+    const result = await Swal.fire({ title: 'Delete Sale Record?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', cancelButtonColor: '#001e00', confirmButtonText: 'Yes, delete' });
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`/sales/${id}`);
+      toast.success('Sale record deleted.');
+      load();
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   return (

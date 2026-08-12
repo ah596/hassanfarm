@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Button, Card, Input, Select, SectionHeader, Table, StatCard } from '../components/ui';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 export default function Animals() {
   const [animals, setAnimals] = useState([]);
@@ -19,9 +21,15 @@ export default function Animals() {
 
   const apply = async () => load(filters);
   const remove = async id => {
-    if (!window.confirm('Delete this animal?')) return;
-    await api.delete(`/animals/${id}`);
-    load(filters);
+    const result = await Swal.fire({ title: 'Delete Animal?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', cancelButtonColor: '#001e00', confirmButtonText: 'Yes, delete' });
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`/animals/${id}`);
+      toast.success('Animal deleted successfully.');
+      load(filters);
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   const columns = [

@@ -2,6 +2,8 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Button, Card, Input, Select, SectionHeader, Textarea } from '../components/ui';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const initial = {
   name: '',
@@ -36,9 +38,12 @@ export default function AddAnimal() {
     setError('');
     try {
       const res = await api.post('/animals', form);
+      toast.success('Animal added successfully!');
       navigate(`/animals/${res.data.animal.id}`);
     } catch (err) {
-      setError(err.response?.data?.message || err.message);
+      const msg = err.response?.data?.message || err.message;
+      setError(msg);
+      Swal.fire({ icon: 'error', title: 'Failed to Add Animal', text: msg, confirmButtonColor: '#001e00' });
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
 import { Button, Card, Input, Select, SectionHeader, Table, Textarea } from '../components/ui';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const initial = { animalId: '', category: 'Feed', amount: '', date: '', description: '', receipt: '' };
 
@@ -17,15 +19,26 @@ export default function Expenses() {
 
   const submit = async e => {
     e.preventDefault();
-    await api.post('/expenses', form);
-    setForm(initial);
-    load();
+    try {
+      await api.post('/expenses', form);
+      toast.success('Expense saved!');
+      setForm(initial);
+      load();
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   const remove = async id => {
-    if (!window.confirm('Delete this expense?')) return;
-    await api.delete(`/expenses/${id}`);
-    load();
+    const result = await Swal.fire({ title: 'Delete Expense?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', cancelButtonColor: '#001e00', confirmButtonText: 'Yes, delete' });
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`/expenses/${id}`);
+      toast.success('Expense deleted.');
+      load();
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   return (

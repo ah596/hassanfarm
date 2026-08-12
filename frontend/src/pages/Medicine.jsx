@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
 import { Button, Card, Input, SectionHeader, Table, Textarea } from '../components/ui';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const initial = { animalId: '', medicineName: '', medicineType: '', quantity: '', cost: '', date: '', veterinaryDoctor: '', description: '' };
 
@@ -17,15 +19,26 @@ export default function Medicine() {
 
   const submit = async e => {
     e.preventDefault();
-    await api.post('/medicine', form);
-    setForm(initial);
-    load();
+    try {
+      await api.post('/medicine', form);
+      toast.success('Medicine record saved!');
+      setForm(initial);
+      load();
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   const remove = async id => {
-    if (!window.confirm('Delete this medicine record?')) return;
-    await api.delete(`/medicine/${id}`);
-    load();
+    const result = await Swal.fire({ title: 'Delete Medicine Record?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', cancelButtonColor: '#001e00', confirmButtonText: 'Yes, delete' });
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`/medicine/${id}`);
+      toast.success('Medicine record deleted.');
+      load();
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   return (

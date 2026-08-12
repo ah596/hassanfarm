@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Button, Card, Input, Select, SectionHeader, Textarea, LoadingState } from '../components/ui';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const GESTATION_DAYS = { Cow: 283, Goat: 150 };
 
@@ -72,14 +74,25 @@ export default function AnimalDetails() {
 
   const save = async e => {
     e.preventDefault();
-    await api.put(`/animals/${id}`, form);
-    await load();
+    try {
+      await api.put(`/animals/${id}`, form);
+      toast.success('Animal updated successfully!');
+      await load();
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Update Failed', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   const remove = async () => {
-    if (!window.confirm('Delete this animal?')) return;
-    await api.delete(`/animals/${id}`);
-    navigate('/animals');
+    const result = await Swal.fire({ title: 'Delete Animal?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', cancelButtonColor: '#001e00', confirmButtonText: 'Yes, delete' });
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`/animals/${id}`);
+      toast.success('Animal deleted.');
+      navigate('/animals');
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
+    }
   };
 
   const saveBreeding = async event => {
@@ -88,10 +101,13 @@ export default function AnimalDetails() {
     setBreedingError('');
     try {
       await api.post(`/animals/${id}/breeding`, breedingForm);
+      toast.success('Breeding record saved!');
       setBreedingForm({ breedingDate: '', notes: '' });
       await load();
     } catch (err) {
-      setBreedingError(err.response?.data?.message || err.message);
+      const msg = err.response?.data?.message || err.message;
+      setBreedingError(msg);
+      Swal.fire({ icon: 'error', title: 'Error', text: msg, confirmButtonColor: '#001e00' });
     } finally {
       setSavingBreeding(false);
     }
@@ -103,10 +119,13 @@ export default function AnimalDetails() {
     setBreedingError('');
     try {
       await api.post(`/animals/${id}/breeding/${breedingId}/birth`, { actualBirthDate });
+      toast.success('Birth recorded!');
       setBirthDates(current => ({ ...current, [breedingId]: '' }));
       await load();
     } catch (err) {
-      setBreedingError(err.response?.data?.message || err.message);
+      const msg = err.response?.data?.message || err.message;
+      setBreedingError(msg);
+      Swal.fire({ icon: 'error', title: 'Error', text: msg, confirmButtonColor: '#001e00' });
     }
   };
 
