@@ -90,7 +90,6 @@ export function AppLayout() {
               {/* Desktop title */}
               <Link to="/" className="hidden lg:block">
                 <div className="text-lg font-bold text-[#001e00]">Farm Operations</div>
-                <div className="text-xs text-[#3a8a3a]">Firebase-authenticated · Profit-first workflow</div>
               </Link>
 
               <div className="flex items-center gap-3">

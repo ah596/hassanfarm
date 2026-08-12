@@ -162,16 +162,20 @@ export const createAnimal = asyncHandler(async (req, res) => {
   const payload = animalSchema.parse(req.body);
   const animalId = await nextAnimalId();
   const createdAt = new Date().toISOString();
-  const purchaseDate = safeDate(payload.purchaseDate);
-  if (!purchaseDate) {
-    throw new AppError('Invalid purchase date', 400);
+  let purchaseDateStr = null;
+  if (!payload.isSelfBreed) {
+    const purchaseDate = safeDate(payload.purchaseDate);
+    if (!purchaseDate) {
+      throw new AppError('Invalid purchase date', 400);
+    }
+    purchaseDateStr = purchaseDate.toISOString();
   }
 
   const docRef = collectionRefs.animals().doc();
   const animal = {
     ...payload,
     animalId,
-    purchaseDate: purchaseDate.toISOString(),
+    purchaseDate: purchaseDateStr,
     dob: payload.dob ? safeDate(payload.dob)?.toISOString() || null : null,
     createdAt,
     updatedAt: createdAt,

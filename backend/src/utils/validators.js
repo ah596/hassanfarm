@@ -14,7 +14,8 @@ export const animalSchema = z.object({
   sellerContact: z.string().optional().nullable(),
   status: z.enum(['Available', 'Sold', 'Dead', 'Transferred']).default('Available'),
   notes: z.string().optional().nullable(),
-  image: z.string().optional().nullable()
+  image: z.string().optional().nullable(),
+  isSelfBreed: z.boolean().optional().default(false)
 });
 
 export const breedingSchema = z.object({
