@@ -31,7 +31,7 @@ export default function Register() {
           <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#001e00]">
             <img src="/logo.png" alt="logo" className="h-9 w-9 rounded-xl object-cover" />
           </div>
-          <div className="text-xs font-semibold uppercase tracking-[0.3em] text-[#d2b45a]">Goat Farm</div>
+          <div className="text-xs font-bold uppercase tracking-[0.3em] text-[#d2b45a]">Maweshi Farm</div>
           <h1 className="mt-2 text-3xl font-bold text-[#001e00]">Create account</h1>
           <p className="mt-2 text-sm text-[#3a8a3a]">Register to manage the farm dashboard securely.</p>
         </div>
