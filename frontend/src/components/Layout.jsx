@@ -82,7 +82,7 @@ export function AppLayout() {
               <Link to="/" className="flex items-center gap-2.5 lg:hidden">
                 <img src="/logo.png" alt="Goat Farm logo" className="h-9 w-9 border-0 object-contain" />
                 <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#d2b45a]">Goat Farm</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#d2b45a]">Maweshi Farm</div>
                   <div className="text-base font-bold text-[#001e00]">Management</div>
                 </div>
               </Link>
