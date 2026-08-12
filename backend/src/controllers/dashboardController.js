@@ -4,7 +4,7 @@ import { buildSummary, monthKey, toNumber } from '../utils/calculations.js';
 
 async function fetchAll(userId) {
   const [animals, expenses, feed, medicine, sales] = await Promise.all([
-    collectionRefs.animals().where('userId', '==', userId).get(),
+    collectionRefs.animals().where('userId', '==', userId).select('animalId', 'type', 'gender', 'status', 'purchasePrice', 'purchaseDate').get(),
     collectionRefs.expenses().where('userId', '==', userId).get(),
     collectionRefs.feed().where('userId', '==', userId).get(),
     collectionRefs.medicine().where('userId', '==', userId).get(),
