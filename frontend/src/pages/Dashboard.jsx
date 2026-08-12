@@ -34,9 +34,7 @@ export default function Dashboard() {
             <StatCard title="Net Profit" value={`Rs. ${Number(summary.profitSummary?.netProfit || 0).toLocaleString()}`} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
-            <StatCard title="Male Goats" value={summary.maleGoats} />
-            <StatCard title="Female Goats" value={summary.femaleGoats} />
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
             <StatCard title="Total Feed Expenses" value={`Rs. ${Number(summary.totalFeedExpenses || 0).toLocaleString()}`} />
             <StatCard title="Total Medicine Expenses" value={`Rs. ${Number(summary.totalMedicineExpenses || 0).toLocaleString()}`} />
           </div>

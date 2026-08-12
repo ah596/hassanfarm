@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
-import { Button, Card, Input, Select, SectionHeader, Table } from '../components/ui';
+import { Button, Card, Input, Select, SectionHeader, Table, StatCard } from '../components/ui';
 
 export default function Animals() {
   const [animals, setAnimals] = useState([]);
@@ -43,6 +43,18 @@ export default function Animals() {
     }
   ];
 
+  const goats = animals.filter(a => a.type === 'Goat');
+  const mGoats = goats.filter(a => a.gender === 'Male').length;
+  const fGoats = goats.filter(a => a.gender === 'Female').length;
+
+  const cows = animals.filter(a => a.type === 'Cow');
+  const mCows = cows.filter(a => a.gender === 'Male').length;
+  const fCows = cows.filter(a => a.gender === 'Female').length;
+
+  const sheep = animals.filter(a => a.type === 'Sheep');
+  const mSheep = sheep.filter(a => a.gender === 'Male').length;
+  const fSheep = sheep.filter(a => a.gender === 'Female').length;
+
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -50,6 +62,12 @@ export default function Animals() {
         subtitle="Search and manage every cow, goat, or sheep in the farm."
         action={<Button onClick={() => navigate('/animals/new')}>Add Animal</Button>}
       />
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <StatCard title="GOATS" value={goats.length} hint={`Male: ${mGoats} · Female: ${fGoats}`} />
+        <StatCard title="COWS" value={cows.length} hint={`Male: ${mCows} · Female: ${fCows}`} />
+        <StatCard title="SHEEP" value={sheep.length} hint={`Male: ${mSheep} · Female: ${fSheep}`} />
+      </div>
 
       <Card>
         <div className="grid gap-4 md:grid-cols-4">
