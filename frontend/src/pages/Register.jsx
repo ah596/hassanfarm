@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button, Input } from '../components/ui';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 export default function Register() {
   const { register } = useAuth();
@@ -16,9 +18,12 @@ export default function Register() {
     setError('');
     try {
       await register(form);
+      toast.success('Account created successfully!');
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Registration failed');
+      const msg = err.response?.data?.message || err.message || 'Registration failed';
+      setError(msg);
+      Swal.fire({ icon: 'error', title: 'Registration Failed', text: msg, confirmButtonColor: '#001e00' });
     } finally {
       setLoading(false);
     }
@@ -40,9 +45,7 @@ export default function Register() {
             <Input label="Full name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name" required />
             <Input label="Email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" required />
             <Input label="Password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••••••" required />
-            {error ? (
-              <div className="rounded-xl border border-[#a8d8a8] bg-[#f0faf0] px-4 py-3 text-sm text-[#001e00]">{error}</div>
-            ) : null}
+
             <Button className="w-full py-3" type="submit" disabled={loading}>
               {loading ? 'Creating...' : 'Register'}
             </Button>
