@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Button, Card, Input, Select, SectionHeader, Textarea, LoadingState } from '../components/ui';
@@ -30,6 +30,9 @@ export default function AnimalDetails() {
   const [breedingError, setBreedingError] = useState('');
   const [savingBreeding, setSavingBreeding] = useState(false);
   const [birthDates, setBirthDates] = useState({});
+  const [showImageOptions, setShowImageOptions] = useState(false);
+  const cameraRef = useRef(null);
+  const galleryRef = useRef(null);
 
   const load = async () => {
     setLoading(true);
@@ -111,6 +114,45 @@ export default function AnimalDetails() {
   if (error) return <Card><div className="text-[#2B2B2B]">{error}</div></Card>;
   if (!animal) return null;
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        setForm({ ...form, image: dataUrl });
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -161,7 +203,43 @@ export default function AnimalDetails() {
             <Select label="Status" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
               <option>Available</option><option>Sold</option><option>Dead</option><option>Transferred</option>
             </Select>
-            <Input label="Image URL" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+              <div className="flex flex-col items-start gap-2">
+                <Button type="button" variant="secondary" onClick={() => setShowImageOptions(true)}>
+                  Upload Photo
+                </Button>
+                
+                <input type="file" accept="image/*" capture="environment" ref={cameraRef} onChange={(e) => { setShowImageOptions(false); handleImageUpload(e); }} className="hidden" />
+                <input type="file" accept="image/*" ref={galleryRef} onChange={(e) => { setShowImageOptions(false); handleImageUpload(e); }} className="hidden" />
+                
+                {showImageOptions && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+                      <h3 className="mb-4 text-lg font-bold text-[#001e00]">Upload Photo</h3>
+                      <div className="flex flex-col gap-3">
+                        <Button type="button" onClick={() => cameraRef.current?.click()} className="w-full justify-center">
+                          Take Photo
+                        </Button>
+                        <Button type="button" variant="secondary" onClick={() => galleryRef.current?.click()} className="w-full justify-center">
+                          Choose from Gallery
+                        </Button>
+                        <button type="button" onClick={() => setShowImageOptions(false)} className="mt-2 w-full rounded-xl py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {form.image && (
+                 <div className="mt-4 relative inline-block">
+                   <img src={form.image} alt="Preview" className="h-32 object-cover rounded-md border" />
+                   <button type="button" onClick={() => setForm({...form, image: ''})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs">x</button>
+                 </div>
+              )}
+            </div>
             <div className="md:col-span-2">
               <Textarea label="Notes" rows="4" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
             </div>

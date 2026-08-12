@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Button, Card, Input, Select, SectionHeader, Textarea } from '../components/ui';
@@ -25,6 +25,9 @@ export default function AddAnimal() {
   const [form, setForm] = useState(initial);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showImageOptions, setShowImageOptions] = useState(false);
+  const cameraRef = useRef(null);
+  const galleryRef = useRef(null);
   const navigate = useNavigate();
 
   const submit = async e => {
@@ -128,15 +131,37 @@ export default function AddAnimal() {
           </Select>
           
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image (Take Photo or Choose from Gallery)</label>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleImageUpload} 
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" 
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+            <div className="flex flex-col items-start gap-2">
+              <Button type="button" variant="secondary" onClick={() => setShowImageOptions(true)}>
+                Upload Photo
+              </Button>
+              
+              <input type="file" accept="image/*" capture="environment" ref={cameraRef} onChange={(e) => { setShowImageOptions(false); handleImageUpload(e); }} className="hidden" />
+              <input type="file" accept="image/*" ref={galleryRef} onChange={(e) => { setShowImageOptions(false); handleImageUpload(e); }} className="hidden" />
+              
+              {showImageOptions && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                  <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+                    <h3 className="mb-4 text-lg font-bold text-[#001e00]">Upload Photo</h3>
+                    <div className="flex flex-col gap-3">
+                      <Button type="button" onClick={() => cameraRef.current?.click()} className="w-full justify-center">
+                        Take Photo
+                      </Button>
+                      <Button type="button" variant="secondary" onClick={() => galleryRef.current?.click()} className="w-full justify-center">
+                        Choose from Gallery
+                      </Button>
+                      <button type="button" onClick={() => setShowImageOptions(false)} className="mt-2 w-full rounded-xl py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {form.image && (
-               <div className="mt-2 relative inline-block">
+               <div className="mt-4 relative inline-block">
                  <img src={form.image} alt="Preview" className="h-32 object-cover rounded-md border" />
                  <button type="button" onClick={() => setForm({...form, image: ''})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs">x</button>
                </div>
