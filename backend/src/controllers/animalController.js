@@ -37,7 +37,7 @@ const withBreedingStatus = record => {
 };
 
 export const listAnimals = asyncHandler(async (req, res) => {
-  const snapshot = await collectionRefs.animals().where('userId', '==', req.user.uid).select('animalId', 'name', 'type', 'gender', 'status', 'breed', 'color', 'createdAt', 'updatedAt', 'purchasePrice', 'purchaseDate', 'dob', 'sellerName', 'sellerContact', 'weight', 'notes', 'isSelfBreed', 'breedingHistory').get();
+  const snapshot = await collectionRefs.animals().where('userId', '==', req.user.uid).get();
   let animals = snapshot.docs.map(toAnimal);
   const { q, type, gender, status, breed, sortBy = 'createdAt', order = 'desc' } = req.query;
 
