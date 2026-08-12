@@ -35,7 +35,7 @@ export function AppLayout() {
             <Link to="/" className="mb-8 flex items-center gap-3">
               <img src="/logo.png" alt="Goat Farm logo" className="h-10 w-10 border-0 object-contain" />
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d2b45a]">Goat Farm</div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d2b45a]">Maweshi Farm</div>
                 <div className="text-base font-bold text-white">Management</div>
               </div>
             </Link>
@@ -48,10 +48,9 @@ export function AppLayout() {
                   to={item.to}
                   end={item.to === '/'}
                   className={({ isActive }) =>
-                    `rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
-                      isActive || location.pathname === item.to
-                        ? 'bg-[#d2b45a] text-[#001e00]'
-                        : 'text-[#a8d8a8] hover:bg-white/10 hover:text-white'
+                    `rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${isActive || location.pathname === item.to
+                      ? 'bg-[#d2b45a] text-[#001e00]'
+                      : 'text-[#a8d8a8] hover:bg-white/10 hover:text-white'
                     }`
                   }
                 >
@@ -121,10 +120,9 @@ export function AppLayout() {
                       end={item.to === '/'}
                       onClick={closeMobileMenu}
                       className={({ isActive }) =>
-                        `rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
-                          isActive || location.pathname === item.to
-                            ? 'bg-[#001e00] text-white'
-                            : 'text-[#3a8a3a] hover:bg-[#d6f0d6] hover:text-[#001e00]'
+                        `rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${isActive || location.pathname === item.to
+                          ? 'bg-[#001e00] text-white'
+                          : 'text-[#3a8a3a] hover:bg-[#d6f0d6] hover:text-[#001e00]'
                         }`
                       }
                     >
