@@ -80,10 +80,10 @@ export default function Animals() {
         action={<Button onClick={() => navigate('/animals/new')}>Add Animal</Button>}
       />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <StatCard title="GOATS" value={goats.length} hint={`Male: ${mGoats} · Female: ${fGoats}`} />
-        <StatCard title="COWS" value={cows.length} hint={`Male: ${mCows} · Female: ${fCows}`} />
-        <StatCard title="SHEEP" value={sheep.length} hint={`Male: ${mSheep} · Female: ${fSheep}`} />
+      <div className="grid grid-cols-3 gap-2 md:gap-4">
+        <StatCard compact title="GOATS" value={goats.length} hint={`Male: ${mGoats} · Female: ${fGoats}`} />
+        <StatCard compact title="COWS" value={cows.length} hint={`Male: ${mCows} · Female: ${fCows}`} />
+        <StatCard compact title="SHEEP" value={sheep.length} hint={`Male: ${mSheep} · Female: ${fSheep}`} />
       </div>
 
       <Card>

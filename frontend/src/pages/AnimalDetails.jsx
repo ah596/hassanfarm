@@ -181,7 +181,7 @@ export default function AnimalDetails() {
         action={<div className="flex gap-2"><Button variant="danger" onClick={remove}>Delete</Button></div>}
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 md:gap-4 xl:grid-cols-4">
         <Card><div className="text-sm text-[#B3B3B3]">Purchase Price</div><div className="mt-2 text-2xl font-bold text-[#2B2B2B]">Rs. {Number(animal.purchasePrice || 0).toLocaleString()}</div></Card>
         <Card><div className="text-sm text-[#B3B3B3]">Total Investment</div><div className="mt-2 text-2xl font-bold text-[#2B2B2B]">Rs. {Number(summary?.totalInvestment || 0).toLocaleString()}</div></Card>
         <Card><div className="text-sm text-[#B3B3B3]">Sale Price</div><div className="mt-2 text-2xl font-bold text-[#2B2B2B]">Rs. {Number(summary?.salePrice || 0).toLocaleString()}</div></Card>

@@ -2,12 +2,12 @@ export function Card({ children, className = '' }) {
   return <div className={`glass rounded-2xl p-5 ${className}`}>{children}</div>;
 }
 
-export function StatCard({ title, value, hint }) {
+export function StatCard({ title, value, hint, compact = false }) {
   return (
-    <div className="min-w-0 rounded-2xl border border-[#a8d8a8] bg-white p-4 shadow-card sm:p-5">
-      <div className="text-xs font-medium uppercase tracking-wide text-[#3a8a3a] sm:text-sm">{title}</div>
-      <div className="mt-2 break-words text-xl font-bold tracking-tight text-[#001e00] sm:text-3xl">{value}</div>
-      {hint ? <div className="mt-1.5 text-[11px] text-[#3a8a3a] sm:text-xs">{hint}</div> : null}
+    <div className={`min-w-0 rounded-2xl border border-[#a8d8a8] bg-white shadow-card ${compact ? 'p-2 sm:p-5' : 'p-4 sm:p-5'}`}>
+      <div className={`font-medium uppercase tracking-wide text-[#3a8a3a] ${compact ? 'text-[10px] sm:text-sm' : 'text-xs sm:text-sm'}`}>{title}</div>
+      <div className={`break-words font-bold tracking-tight text-[#001e00] ${compact ? 'mt-1 text-lg sm:mt-2 sm:text-3xl' : 'mt-2 text-xl sm:text-3xl'}`}>{value}</div>
+      {hint ? <div className={`text-[#3a8a3a] ${compact ? 'mt-1 text-[8px] leading-tight sm:mt-1.5 sm:text-xs' : 'mt-1.5 text-[11px] sm:text-xs'}`}>{hint}</div> : null}
     </div>
   );
 }
