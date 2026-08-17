@@ -7,14 +7,6 @@ import toast from 'react-hot-toast';
 const GESTATION_DAYS = { Cow: 283, Goat: 150, Sheep: 147 };
 const displayDate = value => value ? new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString() : '—';
 
-function AnimalPhoto({ animal }) {
-  return animal.image ? (
-    <img src={animal.image} alt={animal.name || animal.animalId} className="h-14 w-14 shrink-0 rounded-xl object-cover" />
-  ) : (
-    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#F7F7F7] text-xs font-semibold text-[#B3B3B3]">No photo</div>
-  );
-}
-
 function getEstimate(type, breedingDate) {
   if (!type || !breedingDate) return null;
   const due = new Date(`${breedingDate}T00:00:00Z`);
@@ -138,10 +130,50 @@ export default function Pregnancy() {
           {pregnancyAnimals.length ? pregnancyAnimals.map(animal => (
             <div key={animal.id} className="space-y-3">
                 {[...animal.breedingHistory].reverse().map(record => (
-                  <div key={record.id} className="rounded-xl border border-[#D4D4D4] bg-[#F7F7F7] p-4 text-sm">
-                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                  <div key={record.id} className="space-y-3">
+                  <div className="overflow-hidden rounded-2xl border border-[#d7ead7] bg-[#fbfefb] shadow-card md:hidden">
+                    <div className="relative h-32 overflow-hidden bg-[#d6f0d6]">
+                      {animal.image ? <img src={animal.image} alt={animal.name || animal.animalId} className="h-full w-full object-cover object-center" /> : <div className="flex h-full items-center justify-center text-sm font-medium text-[#3a8a3a]">No animal photo</div>}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#001e00]/75 via-transparent to-transparent" />
+                      <div className="absolute left-3 top-3 flex gap-1.5 text-[9px] font-bold uppercase tracking-wide">
+                        <span className="rounded-md bg-white/90 px-2 py-1 text-[#001e00]">{animal.animalId}</span>
+                        <span className="rounded-md bg-[#d6f0d6]/95 px-2 py-1 text-[#001e00]">{animal.type}</span>
+                      </div>
+                      <div className="absolute inset-x-3 bottom-3 text-lg font-bold text-white">{animal.name || animal.breed || animal.animalId}</div>
+                    </div>
+
+                    <div className="space-y-1.5 p-2">
+                      <div className="flex items-center justify-between gap-3 px-1 py-1">
+                        <div>
+                          <div className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">Current Status</div>
+                          <div className="mt-0.5 text-sm font-bold text-[#001e00]">{record.status || 'Pregnant / Expecting'}</div>
+                        </div>
+                        <div className="min-w-11 rounded-lg bg-[#f0faf0] px-2 py-1 text-center text-[#001e00]">
+                          <div className="text-base font-bold">{record.remainingDays > 0 ? record.remainingDays : '—'}</div>
+                          <div className="text-[8px] font-bold uppercase">Days</div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="rounded-xl bg-white p-1.5"><div className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">Breeding Date</div><div className="mt-0.5 font-bold text-[#001e00]">{displayDate(record.breedingDate)}</div></div>
+                        <div className="rounded-xl bg-white p-1.5"><div className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">Expected Birth</div><div className="mt-0.5 font-bold text-[#001e00]">{displayDate(record.expectedBirthDate)}</div></div>
+                      </div>
+
+                      <div className="flex items-center justify-between rounded-xl bg-white px-2 py-1.5 text-sm">
+                        <span className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">Actual Birth</span>
+                        <span className="font-bold text-[#001e00]">{displayDate(record.actualBirthDate)}</span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button className="flex-1 px-3 py-1.5" onClick={() => editRecord(animal, record)}>✎&nbsp; Edit Record</Button>
+                        <Button variant="danger" className="px-3 py-1.5" onClick={() => deleteRecord(animal, record)}>Delete</Button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="hidden rounded-xl border border-[#D4D4D4] bg-[#F7F7F7] p-4 text-sm md:block">
+                    <div className="mb-3 flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <AnimalPhoto animal={animal} />
+                        {animal.image ? <img src={animal.image} alt={animal.name || animal.animalId} className="h-14 w-14 rounded-xl object-cover" /> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white text-xs text-[#B3B3B3]">No photo</div>}
                         <div>
                           <div className="font-bold text-[#2B2B2B]">{animal.name || animal.animalId}</div>
                           <div className="text-sm text-[#B3B3B3]">{animal.breed || 'Breed not recorded'} · {animal.animalId} · {animal.type}</div>
@@ -153,11 +185,12 @@ export default function Pregnancy() {
                       </div>
                     </div>
                     <div className="grid gap-2 md:grid-cols-4">
-                    <div><span className="text-[#B3B3B3]">Breeding</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{displayDate(record.breedingDate)}</div></div>
-                    <div><span className="text-[#B3B3B3]">Expected Birth</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{displayDate(record.expectedBirthDate)}</div></div>
-                    <div><span className="text-[#B3B3B3]">Status</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{record.status || 'Pregnant / Expecting'}{record.remainingDays > 0 ? ` · ${record.remainingDays} days` : ''}</div></div>
-                    <div><span className="text-[#B3B3B3]">Actual Birth</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{displayDate(record.actualBirthDate)}</div></div>
+                      <div><span className="text-[#B3B3B3]">Breeding</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{displayDate(record.breedingDate)}</div></div>
+                      <div><span className="text-[#B3B3B3]">Expected Birth</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{displayDate(record.expectedBirthDate)}</div></div>
+                      <div><span className="text-[#B3B3B3]">Status</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{record.status || 'Pregnant / Expecting'}{record.remainingDays > 0 ? ` · ${record.remainingDays} days` : ''}</div></div>
+                      <div><span className="text-[#B3B3B3]">Actual Birth</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{displayDate(record.actualBirthDate)}</div></div>
                     </div>
+                  </div>
                   </div>
                 ))}
             </div>
