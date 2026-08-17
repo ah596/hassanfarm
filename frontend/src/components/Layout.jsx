@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui';
@@ -22,7 +22,28 @@ export function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef(null);
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+
+    const closeOnOutsideClick = event => {
+      if (!headerRef.current?.contains(event.target)) closeMobileMenu();
+    };
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') closeMobileMenu();
+    };
+
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    document.addEventListener('touchstart', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick);
+      document.removeEventListener('touchstart', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <div className="min-h-screen bg-[#f4f7f4] text-[#001e00]">
@@ -76,7 +97,7 @@ export function AppLayout() {
         {/* Main */}
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-5 py-4">
+          <header ref={headerRef} className="sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-5 py-4">
             <div className="flex items-center justify-between gap-3">
               {/* Mobile logo */}
               <Link to="/" className="flex items-center gap-2.5 lg:hidden">
