@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Button, Card, Input, Select, SectionHeader, Table, StatCard } from '../components/ui';
@@ -71,6 +71,10 @@ export default function Animals() {
   const sheep = animals.filter(a => a.type === 'Sheep');
   const mSheep = sheep.filter(a => a.gender === 'Male').length;
   const fSheep = sheep.filter(a => a.gender === 'Female').length;
+  const searchSuggestions = useMemo(
+    () => [...new Set(animals.flatMap(animal => [animal.name, animal.animalId, animal.breed]).filter(Boolean))],
+    [animals]
+  );
 
   return (
     <div className="space-y-6">
@@ -87,8 +91,13 @@ export default function Animals() {
       </div>
 
       <Card>
-        <div className="grid gap-4 md:grid-cols-4">
-          <Input label="Search" value={filters.q} onChange={e => setFilters({ ...filters, q: e.target.value })} />
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+          <div className="col-span-2 md:col-span-1">
+            <Input label="Search" list="animal-search-suggestions" value={filters.q} onChange={e => setFilters({ ...filters, q: e.target.value })} />
+            <datalist id="animal-search-suggestions">
+              {searchSuggestions.map(suggestion => <option key={suggestion} value={suggestion} />)}
+            </datalist>
+          </div>
           <Select label="Type" value={filters.type} onChange={e => setFilters({ ...filters, type: e.target.value })}>
             <option value="">All</option>
             <option value="Cow">Cow</option>
@@ -107,8 +116,11 @@ export default function Animals() {
             <option value="Dead">Dead</option>
             <option value="Transferred">Transferred</option>
           </Select>
+          <div className="flex items-end md:hidden">
+            <Button className="w-full" onClick={apply}>Apply filters</Button>
+          </div>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 hidden md:block">
           <Button onClick={apply}>Apply filters</Button>
         </div>
       </Card>
