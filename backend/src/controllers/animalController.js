@@ -63,7 +63,14 @@ export const listAnimals = asyncHandler(async (req, res) => {
     return order === 'asc' ? comparison : -comparison;
   });
 
-  res.json({ animals });
+  // Include live pregnancy status in the list response so the Pregnancy page can
+  // show every saved record without making a separate request per animal.
+  res.json({
+    animals: animals.map(animal => ({
+      ...animal,
+      breedingHistory: (animal.breedingHistory || []).map(withBreedingStatus)
+    }))
+  });
 });
 
 export const getAnimal = asyncHandler(async (req, res) => {
@@ -131,6 +138,47 @@ export const recordBreeding = asyncHandler(async (req, res) => {
   const breedingHistory = [...(animal.breedingHistory || []), record];
   await animalDoc.ref.set({ breedingHistory, updatedAt: new Date().toISOString() }, { merge: true });
   res.status(201).json({ message: 'Breeding record saved', breeding: withBreedingStatus(record) });
+});
+
+export const updateBreeding = asyncHandler(async (req, res) => {
+  const animalDoc = await collectionRefs.animals().doc(req.params.id).get();
+  if (!animalDoc.exists) throw new AppError('Animal not found', 404);
+
+  const animal = animalDoc.data();
+  if (animal.userId && animal.userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
+  const recordIndex = (animal.breedingHistory || []).findIndex(record => record.id === req.params.breedingId);
+  if (recordIndex < 0) throw new AppError('Breeding record not found', 404);
+
+  const payload = breedingSchema.parse(req.body);
+  const breedingDate = dateOnly(payload.breedingDate);
+  if (!breedingDate) throw new AppError('Invalid breeding date', 400);
+
+  const breedingHistory = [...animal.breedingHistory];
+  breedingHistory[recordIndex] = {
+    ...breedingHistory[recordIndex],
+    breedingDate,
+    expectedBirthDate: expectedBirthDate(breedingDate, animal.type),
+    notes: payload.notes || null,
+    updatedAt: new Date().toISOString()
+  };
+  await animalDoc.ref.set({ breedingHistory, updatedAt: new Date().toISOString() }, { merge: true });
+  res.json({ message: 'Breeding record updated', breeding: withBreedingStatus(breedingHistory[recordIndex]) });
+});
+
+export const deleteBreeding = asyncHandler(async (req, res) => {
+  const animalDoc = await collectionRefs.animals().doc(req.params.id).get();
+  if (!animalDoc.exists) throw new AppError('Animal not found', 404);
+
+  const animal = animalDoc.data();
+  if (animal.userId && animal.userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
+  const breedingHistory = animal.breedingHistory || [];
+  const remainingHistory = breedingHistory.filter(record => record.id !== req.params.breedingId);
+  if (remainingHistory.length === breedingHistory.length) throw new AppError('Breeding record not found', 404);
+
+  await animalDoc.ref.set({ breedingHistory: remainingHistory, updatedAt: new Date().toISOString() }, { merge: true });
+  res.json({ message: 'Breeding record deleted' });
 });
 
 export const recordBirth = asyncHandler(async (req, res) => {

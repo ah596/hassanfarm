@@ -7,6 +7,8 @@ import {
   deleteAnimal,
   animalSummary,
   recordBreeding,
+  updateBreeding,
+  deleteBreeding,
   recordBirth
 } from '../controllers/animalController.js';
 import { protect } from '../middleware/auth.js';
@@ -19,6 +21,8 @@ router.post('/', createAnimal);
 router.get('/:id', getAnimal);
 router.get('/:id/summary', animalSummary);
 router.post('/:id/breeding', recordBreeding);
+router.put('/:id/breeding/:breedingId', updateBreeding);
+router.delete('/:id/breeding/:breedingId', deleteBreeding);
 router.post('/:id/breeding/:breedingId/birth', recordBirth);
 router.put('/:id', updateAnimal);
 router.delete('/:id', deleteAnimal);
