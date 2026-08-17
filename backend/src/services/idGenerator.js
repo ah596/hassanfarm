@@ -1,7 +1,9 @@
 import { collectionRefs, db } from './firestore.js';
 
-export async function nextAnimalId() {
-  const counterRef = db().collection('counters').doc('animals');
+export async function nextAnimalId(type) {
+  const prefixes = { Cow: 'C', Goat: 'G', Sheep: 'S' };
+  const prefix = prefixes[type] || 'A';
+  const counterRef = db().collection('counters').doc(`animals-${prefix}`);
   const id = await db().runTransaction(async transaction => {
     const snap = await transaction.get(counterRef);
     const current = snap.exists ? Number(snap.data().nextSequence || 1) : 1;
@@ -9,7 +11,7 @@ export async function nextAnimalId() {
     return current;
   });
 
-  return `G-${String(id).padStart(3, '0')}`;
+  return `${prefix}-${String(id).padStart(3, '0')}`;
 }
 
 export async function nextDocId(prefix) {

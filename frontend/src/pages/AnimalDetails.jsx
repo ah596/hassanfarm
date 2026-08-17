@@ -46,6 +46,7 @@ export default function AnimalDetails() {
     setAnimal(item);
     setSummary(summaryRes.data);
     setForm({
+      animalId: item.animalId || '',
       name: item.name || '',
       type: item.type || 'Goat',
       gender: item.gender || 'Male',
@@ -191,6 +192,7 @@ export default function AnimalDetails() {
         <Card>
           <div className="mb-4 text-lg font-bold text-[#2B2B2B]">Edit Animal</div>
           <form className="grid gap-4 md:grid-cols-2" onSubmit={save}>
+            <Input label="Tag / Animal ID" value={form.animalId} onChange={e => setForm({ ...form, animalId: e.target.value })} required />
             <Input label="Animal Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
             <Select label="Type" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
               <option>Cow</option><option>Goat</option><option>Sheep</option>

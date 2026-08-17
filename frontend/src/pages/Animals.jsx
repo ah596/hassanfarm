@@ -5,6 +5,14 @@ import { Button, Card, Input, Select, SectionHeader, Table, StatCard } from '../
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
+function AnimalPhoto({ animal }) {
+  return animal.image ? (
+    <img src={animal.image} alt={animal.name || animal.animalId} className="h-12 w-12 rounded-xl object-cover" />
+  ) : (
+    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f0faf0] text-xs font-semibold text-[#3a8a3a]">—</div>
+  );
+}
+
 export default function Animals() {
   const [animals, setAnimals] = useState([]);
   const [filters, setFilters] = useState({ q: '', type: '', gender: '', status: '' });
@@ -33,6 +41,7 @@ export default function Animals() {
   };
 
   const columns = [
+    { key: 'image', label: 'Photo', render: row => <AnimalPhoto animal={row} /> },
     { key: 'animalId', label: 'Animal ID' },
     { key: 'type', label: 'Type' },
     { key: 'gender', label: 'Gender' },

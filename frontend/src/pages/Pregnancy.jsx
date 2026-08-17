@@ -7,6 +7,14 @@ import toast from 'react-hot-toast';
 const GESTATION_DAYS = { Cow: 283, Goat: 150, Sheep: 147 };
 const displayDate = value => value ? new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString() : '—';
 
+function AnimalPhoto({ animal }) {
+  return animal.image ? (
+    <img src={animal.image} alt={animal.name || animal.animalId} className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+  ) : (
+    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#F7F7F7] text-xs font-semibold text-[#B3B3B3]">No photo</div>
+  );
+}
+
 function getEstimate(type, breedingDate) {
   if (!type || !breedingDate) return null;
   const due = new Date(`${breedingDate}T00:00:00Z`);
@@ -128,17 +136,21 @@ export default function Pregnancy() {
         <div className="mb-4 text-lg font-bold text-[#2B2B2B]">Saved Pregnancy Records</div>
         <div className="space-y-5">
           {pregnancyAnimals.length ? pregnancyAnimals.map(animal => (
-            <div key={animal.id} className="rounded-2xl border border-[#D4D4D4] p-4">
-              <div className="mb-3">
-                <div className="font-bold text-[#2B2B2B]">{animal.name || animal.animalId}</div>
-                <div className="text-sm text-[#B3B3B3]">{animal.breed || 'Breed not recorded'} · {animal.animalId} · {animal.type}</div>
-              </div>
-              <div className="space-y-3">
+            <div key={animal.id} className="space-y-3">
                 {[...animal.breedingHistory].reverse().map(record => (
                   <div key={record.id} className="rounded-xl border border-[#D4D4D4] bg-[#F7F7F7] p-4 text-sm">
-                    <div className="mb-3 flex flex-wrap justify-end gap-2">
-                      <Button variant="secondary" className="px-3 py-2" onClick={() => editRecord(animal, record)}>Edit</Button>
-                      <Button variant="danger" className="px-3 py-2" onClick={() => deleteRecord(animal, record)}>Delete</Button>
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <AnimalPhoto animal={animal} />
+                        <div>
+                          <div className="font-bold text-[#2B2B2B]">{animal.name || animal.animalId}</div>
+                          <div className="text-sm text-[#B3B3B3]">{animal.breed || 'Breed not recorded'} · {animal.animalId} · {animal.type}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="secondary" className="px-3 py-2" onClick={() => editRecord(animal, record)}>Edit</Button>
+                        <Button variant="danger" className="px-3 py-2" onClick={() => deleteRecord(animal, record)}>Delete</Button>
+                      </div>
                     </div>
                     <div className="grid gap-2 md:grid-cols-4">
                     <div><span className="text-[#B3B3B3]">Breeding</span><div className="mt-0.5 font-medium text-[#2B2B2B]">{displayDate(record.breedingDate)}</div></div>
@@ -148,7 +160,6 @@ export default function Pregnancy() {
                     </div>
                   </div>
                 ))}
-              </div>
             </div>
           )) : <div className="text-sm text-[#B3B3B3]">{selectedAnimal ? 'No pregnancy records for this animal yet.' : 'No saved pregnancy records yet.'}</div>}
         </div>

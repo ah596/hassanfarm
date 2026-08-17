@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const animalSchema = z.object({
+  animalId: z.string().trim().min(1).max(80).optional(),
   name: z.string().optional().nullable(),
   type: z.enum(['Cow', 'Goat', 'Sheep']),
   gender: z.enum(['Male', 'Female']),

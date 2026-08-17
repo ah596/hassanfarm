@@ -208,7 +208,7 @@ export const recordBirth = asyncHandler(async (req, res) => {
 
 export const createAnimal = asyncHandler(async (req, res) => {
   const payload = animalSchema.parse(req.body);
-  const animalId = await nextAnimalId();
+  const animalId = await nextAnimalId(payload.type);
   const createdAt = new Date().toISOString();
   let purchaseDateStr = null;
   if (!payload.isSelfBreed) {
@@ -249,6 +249,15 @@ export const updateAnimal = asyncHandler(async (req, res) => {
     updatedAt: new Date().toISOString()
   };
 
+  const requestedAnimalId = incoming.animalId?.trim().toUpperCase();
+  if (requestedAnimalId && requestedAnimalId !== existing.animalId) {
+    const matchingAnimal = await collectionRefs.animals().where('animalId', '==', requestedAnimalId).limit(1).get();
+    if (!matchingAnimal.empty) {
+      throw new AppError('This tag is already registered', 409);
+    }
+    updates.animalId = requestedAnimalId;
+  }
+
   if (incoming.purchaseDate) {
     const date = safeDate(incoming.purchaseDate);
     if (!date) throw new AppError('Invalid purchase date', 400);
@@ -264,7 +273,22 @@ export const updateAnimal = asyncHandler(async (req, res) => {
     throw new AppError('Animal already sold', 400);
   }
 
-  await collectionRefs.animals().doc(req.params.id).set(updates, { merge: true });
+  if (updates.animalId && updates.animalId !== existing.animalId) {
+    const [expensesSnap, feedSnap, medicineSnap, salesSnap] = await Promise.all([
+      collectionRefs.expenses().where('animalId', '==', existing.animalId).get(),
+      collectionRefs.feed().where('animalId', '==', existing.animalId).get(),
+      collectionRefs.medicine().where('animalId', '==', existing.animalId).get(),
+      collectionRefs.sales().where('animalId', '==', existing.animalId).get()
+    ]);
+    const batch = existingDoc.ref.firestore.batch();
+    batch.set(existingDoc.ref, updates, { merge: true });
+    [expensesSnap, feedSnap, medicineSnap, salesSnap].forEach(snapshot => {
+      snapshot.docs.forEach(doc => batch.update(doc.ref, { animalId: updates.animalId }));
+    });
+    await batch.commit();
+  } else {
+    await existingDoc.ref.set(updates, { merge: true });
+  }
   const updated = await collectionRefs.animals().doc(req.params.id).get();
 
   res.json({ message: 'Animal updated', animal: { id: updated.id, ...updated.data() } });
