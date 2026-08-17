@@ -7,7 +7,7 @@ import { safeDate } from '../utils/calculations.js';
 
 const toAnimal = doc => ({ id: doc.id, ...doc.data() });
 
-const GESTATION_DAYS = { Cow: 283, Goat: 150 };
+const GESTATION_DAYS = { Cow: 283, Goat: 150, Sheep: 147 };
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const dateOnly = value => {
@@ -119,7 +119,7 @@ export const recordBreeding = asyncHandler(async (req, res) => {
   if (animal.userId && animal.userId !== req.user.uid) throw new AppError('Not authorized', 403);
 
   if (animal.gender !== 'Female' || !GESTATION_DAYS[animal.type]) {
-    throw new AppError('Breeding records are available only for female cows and goats', 400);
+    throw new AppError('Breeding records are available only for female cows, goats, and sheep', 400);
   }
 
   const payload = breedingSchema.parse(req.body);

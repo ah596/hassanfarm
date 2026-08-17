@@ -4,7 +4,7 @@ import { Button, Card, Input, SectionHeader, Select, Textarea, LoadingState } fr
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 
-const GESTATION_DAYS = { Cow: 283, Goat: 150 };
+const GESTATION_DAYS = { Cow: 283, Goat: 150, Sheep: 147 };
 const displayDate = value => value ? new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString() : '—';
 
 function getEstimate(type, breedingDate) {
@@ -119,7 +119,7 @@ export default function Pregnancy() {
           <option value="">All saved animals</option>
           {eligibleAnimals.map(animal => <option key={animal.id} value={animal.id}>{animal.animalId} — {animal.name || animal.breed} ({animal.type})</option>)}
         </Select>
-        {!eligibleAnimals.length ? <div className="mt-3 text-sm text-[#B3B3B3]">No female cows or goats have been saved yet.</div> : null}
+        {!eligibleAnimals.length ? <div className="mt-3 text-sm text-[#B3B3B3]">No female cows, goats, or sheep have been saved yet.</div> : null}
       </Card>
 
       {error && !selectedAnimal ? <Card><div className="text-sm text-red-700">{error}</div></Card> : null}
