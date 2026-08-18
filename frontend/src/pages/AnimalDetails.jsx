@@ -28,7 +28,7 @@ export default function AnimalDetails() {
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState('');
   const [form, setForm] = useState(null);
-  const [breedingForm, setBreedingForm] = useState({ breedingDate: '', notes: '' });
+  const [breedingForm, setBreedingForm] = useState({ breedingDate: '', pregnancyNumber: '1', notes: '' });
   const [breedingError, setBreedingError] = useState('');
   const [savingBreeding, setSavingBreeding] = useState(false);
   const [birthDates, setBirthDates] = useState({});
@@ -103,7 +103,7 @@ export default function AnimalDetails() {
     try {
       await api.post(`/animals/${id}/breeding`, breedingForm);
       toast.success('Breeding record saved!');
-      setBreedingForm({ breedingDate: '', notes: '' });
+      setBreedingForm({ breedingDate: '', pregnancyNumber: '1', notes: '' });
       await load();
     } catch (err) {
       const msg = err.response?.data?.message || err.message;
@@ -177,7 +177,7 @@ export default function AnimalDetails() {
     <div className="space-y-6">
       <SectionHeader
         title={`${animal.animalId} · ${animal.breed}`}
-        subtitle={`Status: ${animal.status} · Type: ${animal.type} · Gender: ${animal.gender}`}
+        subtitle={`Status: ${animal.status} · Type: ${animal.type} · Gender: ${animal.gender}${animal.parentAnimalId ? ` · Born to: ${animal.parentName || 'Mother'} (${animal.parentAnimalId})` : ''}`}
         action={<div className="flex gap-2"><Button variant="danger" onClick={remove}>Delete</Button></div>}
       />
 
@@ -310,6 +310,9 @@ export default function AnimalDetails() {
               <div className="text-[#B3B3B3]">Animal Type</div>
               <div className="mt-1 font-semibold text-[#2B2B2B]">{animal.type} · {GESTATION_DAYS[animal.type]} days</div>
             </div>
+            <Select label="Pregnancy number" value={breedingForm.pregnancyNumber} onChange={e => setBreedingForm({ ...breedingForm, pregnancyNumber: e.target.value })}>
+              <option value="1">First pregnancy</option><option value="2">Second pregnancy</option><option value="3">Third pregnancy</option><option value="4">Fourth pregnancy</option><option value="5">Fifth or later pregnancy</option>
+            </Select>
             {estimateBreeding(animal.type, breedingForm.breedingDate) ? (() => {
               const estimate = estimateBreeding(animal.type, breedingForm.breedingDate);
               const status = estimate.remainingDays > 0 ? `Expected Birth in ${estimate.remainingDays} Days` : estimate.remainingDays === 0 ? 'Due Today' : `Overdue by ${Math.abs(estimate.remainingDays)} Days`;

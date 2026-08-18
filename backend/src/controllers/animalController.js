@@ -2,7 +2,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/errors.js';
 import { collectionRefs } from '../services/firestore.js';
 import { nextAnimalId } from '../services/idGenerator.js';
-import { animalSchema, birthSchema, breedingSchema } from '../utils/validators.js';
+import { animalSchema, birthSchema, breedingSchema, pregnancyOutcomeSchema } from '../utils/validators.js';
 import { safeDate } from '../utils/calculations.js';
 
 const toAnimal = doc => ({ id: doc.id, ...doc.data() });
@@ -25,6 +25,8 @@ const expectedBirthDate = (breedingDate, type) => {
 };
 
 const withBreedingStatus = record => {
+  if (record.outcome === 'Abortion') return { ...record, status: 'Abortion recorded' };
+  if (record.outcome === 'Stillbirth') return { ...record, status: 'Stillbirth recorded' };
   if (record.actualBirthDate) return { ...record, status: 'Birth recorded' };
   const expected = safeDate(record.expectedBirthDate);
   if (!expected) return record;
@@ -129,6 +131,7 @@ export const recordBreeding = asyncHandler(async (req, res) => {
   const record = {
     id: `breeding-${Date.now()}`,
     breedingDate,
+    pregnancyNumber: payload.pregnancyNumber,
     animalType: animal.type,
     gestationDays: GESTATION_DAYS[animal.type],
     expectedBirthDate: expectedBirthDate(breedingDate, animal.type),
@@ -158,6 +161,7 @@ export const updateBreeding = asyncHandler(async (req, res) => {
   breedingHistory[recordIndex] = {
     ...breedingHistory[recordIndex],
     breedingDate,
+    pregnancyNumber: payload.pregnancyNumber,
     expectedBirthDate: expectedBirthDate(breedingDate, animal.type),
     notes: payload.notes || null,
     updatedAt: new Date().toISOString()
@@ -204,6 +208,84 @@ export const recordBirth = asyncHandler(async (req, res) => {
   };
   await animalDoc.ref.set({ breedingHistory, updatedAt: new Date().toISOString() }, { merge: true });
   res.json({ message: 'Birth recorded', breeding: withBreedingStatus(breedingHistory[recordIndex]) });
+});
+
+export const recordPregnancyOutcome = asyncHandler(async (req, res) => {
+  const animalDoc = await collectionRefs.animals().doc(req.params.id).get();
+  if (!animalDoc.exists) throw new AppError('Animal not found', 404);
+
+  const animal = animalDoc.data();
+  if (animal.userId && animal.userId !== req.user.uid) throw new AppError('Not authorized', 403);
+
+  const payload = pregnancyOutcomeSchema.parse(req.body);
+  const outcomeDate = dateOnly(payload.outcomeDate);
+  if (!outcomeDate) throw new AppError('Invalid outcome date', 400);
+
+  const breedingHistory = [...(animal.breedingHistory || [])];
+  const recordIndex = breedingHistory.findIndex(record => record.id === req.params.breedingId);
+  if (recordIndex < 0) throw new AppError('Breeding record not found', 404);
+  if (breedingHistory[recordIndex].outcome || breedingHistory[recordIndex].actualBirthDate) {
+    throw new AppError('An outcome is already recorded for this pregnancy', 400);
+  }
+
+  const completedAt = new Date().toISOString();
+  let child = null;
+  const outcomeRecord = {
+    ...breedingHistory[recordIndex],
+    outcome: payload.outcome,
+    outcomeDate,
+    outcomeNotes: payload.notes || null,
+    completedAt
+  };
+
+  if (payload.outcome === 'Birth') {
+    const animalId = await nextAnimalId(animal.type);
+    const childRef = collectionRefs.animals().doc();
+    child = {
+      animalId,
+      name: payload.babyName || null,
+      type: animal.type,
+      gender: payload.babyGender,
+      breed: animal.breed || 'Not recorded',
+      color: null,
+      weight: 0,
+      dob: new Date(`${outcomeDate}T00:00:00.000Z`).toISOString(),
+      purchaseDate: null,
+      purchasePrice: null,
+      sellerName: null,
+      sellerContact: null,
+      status: 'Available',
+      notes: `Born from ${animal.animalId}${animal.name ? ` (${animal.name})` : ''}.`,
+      image: null,
+      isSelfBreed: true,
+      parentId: animalDoc.id,
+      parentAnimalId: animal.animalId,
+      parentName: animal.name || null,
+      birthRecordId: breedingHistory[recordIndex].id,
+      userId: req.user.uid,
+      purchasedBy: req.user.uid,
+      createdAt: completedAt,
+      updatedAt: completedAt
+    };
+    outcomeRecord.actualBirthDate = outcomeDate;
+    outcomeRecord.childId = childRef.id;
+    outcomeRecord.childAnimalId = animalId;
+
+    breedingHistory[recordIndex] = outcomeRecord;
+    const batch = animalDoc.ref.firestore.batch();
+    batch.set(animalDoc.ref, { breedingHistory, updatedAt: completedAt }, { merge: true });
+    batch.set(childRef, child);
+    await batch.commit();
+  } else {
+    breedingHistory[recordIndex] = outcomeRecord;
+    await animalDoc.ref.set({ breedingHistory, updatedAt: completedAt }, { merge: true });
+  }
+
+  res.status(201).json({
+    message: payload.outcome === 'Birth' ? 'Birth recorded and baby animal created' : `${payload.outcome} recorded`,
+    breeding: withBreedingStatus(outcomeRecord),
+    child: child ? { id: outcomeRecord.childId, ...child } : null
+  });
 });
 
 export const createAnimal = asyncHandler(async (req, res) => {

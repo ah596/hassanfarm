@@ -46,6 +46,7 @@ export default function Animals() {
     { key: 'type', label: 'Type' },
     { key: 'gender', label: 'Gender' },
     { key: 'breed', label: 'Breed' },
+    { key: 'parentAnimalId', label: 'Mother', render: row => row.parentAnimalId ? `${row.parentName || 'Mother'} (${row.parentAnimalId})` : '—' },
     { key: 'status', label: 'Status' },
     { key: 'purchasePrice', label: 'Purchase Price', render: row => `Rs. ${Number(row.purchasePrice || 0).toLocaleString()}` },
     {

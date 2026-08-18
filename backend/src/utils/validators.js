@@ -21,12 +21,25 @@ export const animalSchema = z.object({
 
 export const breedingSchema = z.object({
   breedingDate: z.string().min(1),
+  pregnancyNumber: z.coerce.number().int().min(1).max(30).default(1),
   notes: z.string().optional().nullable()
 });
 
 export const birthSchema = z.object({
   actualBirthDate: z.string().min(1),
   notes: z.string().optional().nullable()
+});
+
+export const pregnancyOutcomeSchema = z.object({
+  outcome: z.enum(['Birth', 'Abortion', 'Stillbirth']),
+  outcomeDate: z.string().min(1),
+  babyName: z.string().trim().max(80).optional().nullable(),
+  babyGender: z.enum(['Male', 'Female']).optional(),
+  notes: z.string().optional().nullable()
+}).superRefine((value, ctx) => {
+  if (value.outcome === 'Birth' && !value.babyGender) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['babyGender'], message: 'Select the baby gender' });
+  }
 });
 
 export const expenseSchema = z.object({
