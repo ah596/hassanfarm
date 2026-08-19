@@ -53,6 +53,7 @@ const prepareActivity = payload => {
 
   if (payload.type === 'Spray / Pesticide') {
     if (!details.applicationNumber) throw new AppError('Spray/application number is required', 400);
+    if (!payload.date) throw new AppError('Spray date is required', 400);
     const products = Array.isArray(details.products) ? details.products : [];
     const productRowsTotal = products.reduce((sum, product) => sum + amount(product.price), 0);
     const productAmount = amount(details.productAmount) || productRowsTotal;
