@@ -99,7 +99,7 @@ export const cropSeasonSchema = z.object({
 });
 
 export const cropActivitySchema = z.object({
-  type: z.enum(['Land Preparation', 'Seed / Sowing', 'Fertilizer', 'Spray / Pesticide', 'Irrigation', 'Labour', 'Machinery', 'Other Expense', 'Harvesting']),
+  type: z.enum(['Land Preparation', 'Seed / Sowing', 'Fertilizer', 'Spray / Pesticide', 'Pesticide Application', 'Irrigation', 'Labour', 'Machinery', 'Other Expense', 'Harvesting']),
   date: z.string().optional().nullable(),
   title: z.string().trim().max(120).optional().default(''),
   quantity: z.coerce.number().min(0).optional().default(0),

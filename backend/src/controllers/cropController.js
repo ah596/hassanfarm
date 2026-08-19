@@ -66,6 +66,12 @@ const prepareActivity = payload => {
     totalCost = productAmount + labourCost + otherCost;
   }
 
+  if (payload.type === 'Pesticide Application') {
+    if (!details.applicationNumber) throw new AppError('Pesticide application number is required', 400);
+    details.amount = amount(details.amount);
+    totalCost = details.amount;
+  }
+
   return { ...payload, details, totalCost, quantity: amount(payload.quantity) };
 };
 
@@ -162,7 +168,7 @@ export const deleteSale = asyncHandler(async (req, res) => {
 export const cropDashboard = asyncHandler(async (req, res) => {
   const season = await ensureSeason(req.params.seasonId, req.user.uid);
   const [activities, yields, sales] = await Promise.all([listForSeason(collectionRefs.cropActivities, season.id, req.user.uid), listForSeason(collectionRefs.cropYields, season.id, req.user.uid), listForSeason(collectionRefs.cropSales, season.id, req.user.uid)]);
-  const costsByType = Object.fromEntries(['Land Preparation', 'Seed / Sowing', 'Fertilizer', 'Spray / Pesticide', 'Irrigation', 'Labour', 'Machinery', 'Other Expense', 'Harvesting'].map(type => [type, activities.filter(a => a.type === type).reduce((sum, a) => sum + amount(a.totalCost), 0)]));
+  const costsByType = Object.fromEntries(['Land Preparation', 'Seed / Sowing', 'Fertilizer', 'Spray / Pesticide', 'Pesticide Application', 'Irrigation', 'Labour', 'Machinery', 'Other Expense', 'Harvesting'].map(type => [type, activities.filter(a => a.type === type).reduce((sum, a) => sum + amount(a.totalCost), 0)]));
   const activityCost = activities.reduce((sum, item) => sum + amount(item.totalCost), 0);
   const rentCost = season.landOwnership === 'Rented / Theka' ? amount(season.rentCost) : 0;
   const totalInvestment = activityCost + rentCost;
@@ -173,8 +179,9 @@ export const cropDashboard = asyncHandler(async (req, res) => {
   const fertilizerRecords = activities.filter(a => a.type === 'Fertilizer');
   const fertilizerCost = costsByType.Fertilizer;
   const sprayRecords = activities.filter(a => a.type === 'Spray / Pesticide');
+  const pesticideRecords = activities.filter(a => a.type === 'Pesticide Application');
   const timeline = [...activities.map(a => ({ id: a.id, date: a.date, title: a.title, type: a.type, detail: a.quantity ? `${a.quantity} ${a.unit || ''}`.trim() : '' })), ...yields.map(y => ({ id: y.id, date: y.date, title: `${y.harvestNumber} yield recorded`, type: 'Yield', detail: `${y.totalProduction} ${y.unit}` })), ...sales.map(s => ({ id: s.id, date: s.saleDate, title: `Sold to ${s.buyerName}`, type: 'Sale', detail: `${s.quantitySold} ${s.unit}` }))].sort(byNewestDate);
-  res.json({ season, activities, yields, sales, timeline, summary: { costsByType, totalInvestment, totalRevenue, netProfit: totalRevenue - totalInvestment, totalProduction, acres, costPerAcre: acres ? totalInvestment / acres : 0, revenuePerAcre: acres ? totalRevenue / acres : 0, profitPerAcre: acres ? (totalRevenue - totalInvestment) / acres : 0, yieldPerAcre: acres ? totalProduction / acres : 0, roi: totalInvestment ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0, irrigationCount: activities.filter(a => a.type === 'Irrigation').length, landPreparation: { totalCost: landPreparationCost, costPerAcre: acres ? landPreparationCost / acres : 0, operations: activities.filter(a => a.type === 'Land Preparation').length }, fertilizer: { totalCost: fertilizerCost, totalBags: fertilizerRecords.reduce((sum, item) => sum + amount(item.details?.bags), 0), applications: fertilizerRecords.length }, spray: { totalCost: costsByType['Spray / Pesticide'], applications: sprayRecords.length } } });
+  res.json({ season, activities, yields, sales, timeline, summary: { costsByType, totalInvestment, totalRevenue, netProfit: totalRevenue - totalInvestment, totalProduction, acres, costPerAcre: acres ? totalInvestment / acres : 0, revenuePerAcre: acres ? totalRevenue / acres : 0, profitPerAcre: acres ? (totalRevenue - totalInvestment) / acres : 0, yieldPerAcre: acres ? totalProduction / acres : 0, roi: totalInvestment ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0, irrigationCount: activities.filter(a => a.type === 'Irrigation').length, landPreparation: { totalCost: landPreparationCost, costPerAcre: acres ? landPreparationCost / acres : 0, operations: activities.filter(a => a.type === 'Land Preparation').length }, fertilizer: { totalCost: fertilizerCost, totalBags: fertilizerRecords.reduce((sum, item) => sum + amount(item.details?.bags), 0), applications: fertilizerRecords.length }, spray: { totalCost: costsByType['Spray / Pesticide'], applications: sprayRecords.length }, pesticide: { totalCost: costsByType['Pesticide Application'], applications: pesticideRecords.length } } });
 });
 
 export const cropReports = asyncHandler(async (req, res) => {
