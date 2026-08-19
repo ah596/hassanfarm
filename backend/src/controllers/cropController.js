@@ -165,9 +165,58 @@ export const listSales = asyncHandler(async (req, res) => {
 });
 export const createSale = asyncHandler(async (req, res) => {
   await ensureSeason(req.params.seasonId, req.user.uid);
-  const payload = cropSaleSchema.parse(req.body); const grossAmount = amount(payload.quantitySold) * amount(payload.ratePerUnit); const deductions = amount(payload.transportCost) + amount(payload.marketCharges) + amount(payload.commission) + amount(payload.otherDeduction); const doc = { ...payload, grossAmount, netSaleAmount: grossAmount - deductions, balance: grossAmount - amount(payload.amountReceived), seasonId: req.params.seasonId, userId: req.user.uid, createdAt: new Date().toISOString() };
-  const ref = collectionRefs.cropSales().doc(); await ref.set(doc); res.status(201).json({ sale: { id: ref.id, ...doc } });
+  const payload = cropSaleSchema.parse(req.body);
+  const { quantitySold, unit, weightPerBag, ratePerUnit, applyKaat, kaatDeductionKg, kaatPerKg } = payload;
+
+  // Convert to Kg
+  const toKg = { Kg: 1, Maund: 40, Ton: 1000 };
+  const totalKg = unit === 'Bags'
+    ? amount(quantitySold) * amount(weightPerBag)
+    : amount(quantitySold) * (toKg[unit] || 1);
+
+  // Kaat calculation
+  const kaatKg = applyKaat && totalKg > 0 ? (totalKg / amount(kaatPerKg || 50)) * amount(kaatDeductionKg || 1) : 0;
+  const finalKg = totalKg - kaatKg;
+
+  // Final quantity in original unit
+  const finalQty = unit === 'Bags' ? finalKg / (amount(weightPerBag) || 1)
+    : unit === 'Kg' ? finalKg
+    : finalKg / (toKg[unit] || 1);
+
+  const grossAmount = finalQty * amount(ratePerUnit);
+
+  const doc = {
+    ...payload,
+    totalKg,
+    kaatKg,
+    finalKg,
+    finalQty,
+    grossAmount,
+    netSaleAmount: grossAmount,
+    seasonId: req.params.seasonId,
+    userId: req.user.uid,
+    createdAt: new Date().toISOString()
+  };
+  const ref = collectionRefs.cropSales().doc();
+  await ref.set(doc);
+  res.status(201).json({ sale: { id: ref.id, ...doc } });
 });
+export const updateSale = asyncHandler(async (req, res) => {
+  const existing = await collectionRefs.cropSales().doc(req.params.recordId).get();
+  if (!existing.exists || existing.data().userId !== req.user.uid || existing.data().seasonId !== req.params.seasonId) throw new AppError('Sale record not found', 404);
+  const payload = cropSaleSchema.parse(req.body);
+  const { quantitySold, unit, weightPerBag, ratePerUnit, applyKaat, kaatDeductionKg, kaatPerKg } = payload;
+  const toKg = { Kg: 1, Maund: 40, Ton: 1000 };
+  const totalKg = unit === 'Bags' ? amount(quantitySold) * amount(weightPerBag) : amount(quantitySold) * (toKg[unit] || 1);
+  const kaatKg = applyKaat && totalKg > 0 ? (totalKg / amount(kaatPerKg || 50)) * amount(kaatDeductionKg || 1) : 0;
+  const finalKg = totalKg - kaatKg;
+  const finalQty = unit === 'Bags' ? finalKg / (amount(weightPerBag) || 1) : unit === 'Kg' ? finalKg : finalKg / (toKg[unit] || 1);
+  const grossAmount = finalQty * amount(ratePerUnit);
+  const doc = { ...payload, totalKg, kaatKg, finalKg, finalQty, grossAmount, netSaleAmount: grossAmount };
+  await existing.ref.set(doc, { merge: true });
+  res.json({ sale: toDoc(await existing.ref.get()) });
+});
+
 export const deleteSale = asyncHandler(async (req, res) => {
   const snap = await collectionRefs.cropSales().doc(req.params.recordId).get(); if (!snap.exists || snap.data().userId !== req.user.uid || snap.data().seasonId !== req.params.seasonId) throw new AppError('Sale record not found', 404); await snap.ref.delete(); res.json({ message: 'Sale deleted' });
 });

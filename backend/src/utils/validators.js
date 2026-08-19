@@ -130,12 +130,10 @@ export const cropSaleSchema = z.object({
   buyerName: z.string().trim().min(1),
   quantitySold: z.coerce.number().min(0),
   unit: z.enum(['Kg', 'Maund', 'Ton', 'Bags']),
+  weightPerBag: z.coerce.number().min(0).optional().default(0),
   ratePerUnit: z.coerce.number().min(0),
-  transportCost: z.coerce.number().min(0).optional().default(0),
-  marketCharges: z.coerce.number().min(0).optional().default(0),
-  commission: z.coerce.number().min(0).optional().default(0),
-  otherDeduction: z.coerce.number().min(0).optional().default(0),
-  paymentStatus: z.enum(['Paid', 'Partial', 'Pending']).default('Pending'),
-  amountReceived: z.coerce.number().min(0).optional().default(0),
+  applyKaat: z.boolean().optional().default(false),
+  kaatDeductionKg: z.coerce.number().min(0).optional().default(1),
+  kaatPerKg: z.coerce.number().min(1).optional().default(50),
   notes: z.string().optional().nullable()
 });
