@@ -1,0 +1,23 @@
+import { Router } from 'express';
+import { protect } from '../middleware/auth.js';
+import { createActivity, createSale, createSeason, createYield, cropDashboard, cropReports, deleteActivity, deleteSale, deleteSeason, deleteYield, getSeason, listActivities, listSales, listSeasons, listYields, updateSeason } from '../controllers/cropController.js';
+
+const router = Router();
+router.use(protect);
+router.get('/reports', cropReports);
+router.get('/', listSeasons);
+router.post('/', createSeason);
+router.get('/:seasonId', getSeason);
+router.put('/:seasonId', updateSeason);
+router.delete('/:seasonId', deleteSeason);
+router.get('/:seasonId/dashboard', cropDashboard);
+router.get('/:seasonId/activities', listActivities);
+router.post('/:seasonId/activities', createActivity);
+router.delete('/:seasonId/activities/:recordId', deleteActivity);
+router.get('/:seasonId/yields', listYields);
+router.post('/:seasonId/yields', createYield);
+router.delete('/:seasonId/yields/:recordId', deleteYield);
+router.get('/:seasonId/sales', listSales);
+router.post('/:seasonId/sales', createSale);
+router.delete('/:seasonId/sales/:recordId', deleteSale);
+export default router;

@@ -15,6 +15,10 @@ import ProfitCalculator from './pages/ProfitCalculator';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Pregnancy from './pages/Pregnancy';
+import ModuleSelect from './pages/ModuleSelect';
+import Crops from './pages/Crops';
+import CropDashboard from './pages/CropDashboard';
+import CropReports from './pages/CropReports';
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -32,7 +36,11 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/" element={<Protected><AppLayout /></Protected>}>
+        <Route path="/" element={<Protected><ModuleSelect /></Protected>} />
+        <Route path="/crops" element={<Protected><Crops /></Protected>} />
+        <Route path="/crops/reports" element={<Protected><CropReports /></Protected>} />
+        <Route path="/crops/:seasonId" element={<Protected><CropDashboard /></Protected>} />
+        <Route path="/farm" element={<Protected><AppLayout /></Protected>}>
           <Route index element={<Dashboard />} />
           <Route path="animals" element={<Animals />} />
           <Route path="animals/new" element={<AddAnimal />} />

@@ -31,7 +31,9 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const credential = await signInWithEmailAndPassword(auth, email, password);
     const idToken = await credential.user.getIdToken();
-    await api.post('/auth/login', { idToken });
+    // Firebase has already authenticated the user. Keep the API profile sync
+    // non-blocking so a temporarily unavailable backend does not stop login.
+    await api.post('/auth/login', { idToken }).catch(() => {});
     return credential.user;
   };
 
@@ -41,7 +43,7 @@ export function AuthProvider({ children }) {
       await updateProfile(credential.user, { displayName: name });
     }
     const idToken = await credential.user.getIdToken();
-    await api.post('/auth/register', { idToken });
+    await api.post('/auth/register', { idToken }).catch(() => {});
     return credential.user;
   };
 

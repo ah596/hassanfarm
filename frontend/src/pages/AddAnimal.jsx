@@ -39,7 +39,7 @@ export default function AddAnimal() {
     try {
       const res = await api.post('/animals', form);
       toast.success('Animal added successfully!');
-      navigate(`/animals/${res.data.animal.id}`);
+      navigate(`/farm/animals/${res.data.animal.id}`);
     } catch (err) {
       const msg = err.response?.data?.message || err.message;
       setError(msg);

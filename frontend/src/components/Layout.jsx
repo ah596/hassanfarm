@@ -4,17 +4,17 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from './ui';
 
 const navItems = [
-  { to: '/', label: 'Dashboard' },
-  { to: '/animals', label: 'Animals' },
-  { to: '/animals/new', label: 'Add Animal' },
-  { to: '/pregnancy', label: 'Pregnancy' },
-  { to: '/expenses', label: 'Expenses' },
-  { to: '/feed', label: 'Feed' },
-  { to: '/medicine', label: 'Medicine' },
-  { to: '/sales', label: 'Sales' },
-  { to: '/profit-calculator', label: 'Profit Calculator' },
-  { to: '/reports', label: 'Reports' },
-  { to: '/settings', label: 'Settings' }
+  { to: '/farm', label: 'Dashboard' },
+  { to: '/farm/animals', label: 'Animals' },
+  { to: '/farm/animals/new', label: 'Add Animal' },
+  { to: '/farm/pregnancy', label: 'Pregnancy' },
+  { to: '/farm/expenses', label: 'Expenses' },
+  { to: '/farm/feed', label: 'Feed' },
+  { to: '/farm/medicine', label: 'Medicine' },
+  { to: '/farm/sales', label: 'Sales' },
+  { to: '/farm/profit-calculator', label: 'Profit Calculator' },
+  { to: '/farm/reports', label: 'Reports' },
+  { to: '/farm/settings', label: 'Settings' }
 ];
 
 export function AppLayout() {
@@ -53,7 +53,7 @@ export function AppLayout() {
         <aside className="hidden w-64 shrink-0 flex-col bg-[#001e00] lg:flex">
           <div className="sticky top-0 flex h-screen flex-col p-6">
             {/* Logo */}
-            <Link to="/" className="mb-8 flex items-center gap-3">
+            <Link to="/farm" className="mb-8 flex items-center gap-3">
               <img src="/logo.png" alt="Goat Farm logo" className="h-10 w-10 border-0 object-contain" />
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d2b45a]">Maweshi Farm</div>
@@ -100,7 +100,7 @@ export function AppLayout() {
           <header ref={headerRef} className="sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-5 py-4">
             <div className="flex items-center justify-between gap-3">
               {/* Mobile logo */}
-              <Link to="/" className="flex items-center gap-2.5 lg:hidden">
+              <Link to="/farm" className="flex items-center gap-2.5 lg:hidden">
                 <img src="/logo.png" alt="Goat Farm logo" className="h-9 w-9 border-0 object-contain" />
                 <div>
                   <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#d2b45a]">Maweshi Farm</div>
@@ -108,7 +108,7 @@ export function AppLayout() {
                 </div>
               </Link>
               {/* Desktop title */}
-              <Link to="/" className="hidden lg:block">
+              <Link to="/farm" className="hidden lg:block">
                 <div className="text-lg font-bold text-[#001e00]">Farm Operations</div>
               </Link>
 
@@ -117,7 +117,7 @@ export function AppLayout() {
                   {user?.email || 'No account'}
                 </div>
                 <Button variant="secondary" className="hidden lg:inline-flex" onClick={logout}>Logout</Button>
-                {location.pathname !== '/' ? <Button variant="secondary" className="lg:hidden" onClick={() => navigate(-1)}>← Back</Button> : null}
+                {location.pathname !== '/farm' ? <Button variant="secondary" className="lg:hidden" onClick={() => navigate(-1)}>← Back</Button> : null}
                 <button
                   type="button"
                   className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#a8d8a8] text-lg text-[#001e00] transition hover:bg-[#d6f0d6] lg:hidden"

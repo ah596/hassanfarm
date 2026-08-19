@@ -8,5 +8,9 @@ export const collectionRefs = {
   expenses: () => db().collection('expenses'),
   feed: () => db().collection('feed'),
   medicine: () => db().collection('medicine'),
-  sales: () => db().collection('sales')
+  sales: () => db().collection('sales'),
+  cropSeasons: () => db().collection('cropSeasons'),
+  cropActivities: () => db().collection('cropActivities'),
+  cropYields: () => db().collection('cropYields'),
+  cropSales: () => db().collection('cropSales')
 };

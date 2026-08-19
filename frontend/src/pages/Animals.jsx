@@ -54,7 +54,7 @@ export default function Animals() {
       label: 'Actions',
       render: row => (
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => navigate(`/animals/${row.id}`)}>View/Edit</Button>
+          <Button variant="secondary" onClick={() => navigate(`/farm/animals/${row.id}`)}>View/Edit</Button>
           <Button variant="danger" onClick={() => remove(row.id)}>Delete</Button>
         </div>
       )
@@ -82,7 +82,7 @@ export default function Animals() {
       <SectionHeader
         title="Animals"
         subtitle="Search and manage every cow, goat, or sheep in the farm."
-        action={<Button onClick={() => navigate('/animals/new')}>Add Animal</Button>}
+        action={<Button onClick={() => navigate('/farm/animals/new')}>Add Animal</Button>}
       />
 
       <div className="grid grid-cols-3 gap-2 md:gap-4">

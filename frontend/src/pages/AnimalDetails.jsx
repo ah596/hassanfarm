@@ -90,7 +90,7 @@ export default function AnimalDetails() {
     try {
       await api.delete(`/animals/${id}`);
       toast.success('Animal deleted.');
-      navigate('/animals');
+      navigate('/farm/animals');
     } catch (err) {
       Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
     }

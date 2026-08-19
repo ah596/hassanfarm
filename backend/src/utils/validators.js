@@ -82,3 +82,58 @@ export const saleSchema = z.object({
   pricePerKg: z.coerce.number().min(0).optional().nullable(),
   notes: z.string().optional().nullable()
 });
+
+export const cropSeasonSchema = z.object({
+  cropName: z.string().trim().min(1).max(80),
+  variety: z.string().trim().optional().nullable(),
+  season: z.string().trim().min(1).max(50),
+  fieldName: z.string().trim().max(100).optional().nullable(),
+  totalArea: z.coerce.number().positive(),
+  areaUnit: z.enum(['Acre', 'Kanal', 'Marla']),
+  sowingDate: z.string().optional().nullable(),
+  expectedHarvestDate: z.string().optional().nullable(),
+  landOwnership: z.enum(['Own', 'Rented / Theka']).default('Own'),
+  rentCost: z.coerce.number().min(0).optional().default(0),
+  notes: z.string().optional().nullable(),
+  status: z.enum(['Planned', 'Active', 'Harvested', 'Sold', 'Closed']).default('Planned')
+});
+
+export const cropActivitySchema = z.object({
+  type: z.enum(['Land Preparation', 'Seed / Sowing', 'Fertilizer', 'Spray / Pesticide', 'Irrigation', 'Labour', 'Machinery', 'Other Expense', 'Harvesting']),
+  date: z.string().min(1),
+  title: z.string().trim().min(1).max(120),
+  quantity: z.coerce.number().min(0).optional().default(0),
+  unit: z.string().trim().max(30).optional().nullable(),
+  totalCost: z.coerce.number().min(0),
+  details: z.record(z.any()).optional().default({}),
+  notes: z.string().optional().nullable()
+});
+
+export const cropYieldSchema = z.object({
+  date: z.string().min(1),
+  harvestNumber: z.string().trim().min(1).max(80),
+  totalProduction: z.coerce.number().min(0),
+  unit: z.enum(['Kg', 'Maund', 'Ton', 'Bags']),
+  bags: z.coerce.number().min(0).optional().default(0),
+  weightPerBag: z.coerce.number().min(0).optional().default(0),
+  quality: z.string().optional().nullable(),
+  moisture: z.string().optional().nullable(),
+  storedQuantity: z.coerce.number().min(0).optional().default(0),
+  soldQuantity: z.coerce.number().min(0).optional().default(0),
+  notes: z.string().optional().nullable()
+});
+
+export const cropSaleSchema = z.object({
+  saleDate: z.string().min(1),
+  buyerName: z.string().trim().min(1),
+  quantitySold: z.coerce.number().min(0),
+  unit: z.enum(['Kg', 'Maund', 'Ton', 'Bags']),
+  ratePerUnit: z.coerce.number().min(0),
+  transportCost: z.coerce.number().min(0).optional().default(0),
+  marketCharges: z.coerce.number().min(0).optional().default(0),
+  commission: z.coerce.number().min(0).optional().default(0),
+  otherDeduction: z.coerce.number().min(0).optional().default(0),
+  paymentStatus: z.enum(['Paid', 'Partial', 'Pending']).default('Pending'),
+  amountReceived: z.coerce.number().min(0).optional().default(0),
+  notes: z.string().optional().nullable()
+});
