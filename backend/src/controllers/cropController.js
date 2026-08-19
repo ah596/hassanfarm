@@ -37,6 +37,34 @@ const prepareActivity = payload => {
     details.areaUnit = details.areaUnit || 'Acre';
   }
 
+  if (payload.type === 'Fertilizer') {
+    const bags = amount(details.bags);
+    const pricePerBag = amount(details.pricePerBag);
+    const labourCost = amount(details.labourCost);
+    if (!details.applicationNumber) throw new AppError('Application number is required', 400);
+    details.bags = bags;
+    details.weightPerBag = amount(details.weightPerBag);
+    details.pricePerBag = pricePerBag;
+    details.fertilizerCost = bags * pricePerBag;
+    details.labourCost = labourCost;
+    details.fertilizerType = details.fertilizerType || 'Other';
+    totalCost = details.fertilizerCost + labourCost;
+  }
+
+  if (payload.type === 'Spray / Pesticide') {
+    if (!details.applicationNumber) throw new AppError('Spray/application number is required', 400);
+    const products = Array.isArray(details.products) ? details.products : [];
+    const productRowsTotal = products.reduce((sum, product) => sum + amount(product.price), 0);
+    const productAmount = amount(details.productAmount) || productRowsTotal;
+    const labourCost = amount(details.labourCost);
+    const otherCost = amount(details.otherCost);
+    details.products = products;
+    details.productAmount = productAmount;
+    details.labourCost = labourCost;
+    details.otherCost = otherCost;
+    totalCost = productAmount + labourCost + otherCost;
+  }
+
   return { ...payload, details, totalCost, quantity: amount(payload.quantity) };
 };
 
@@ -141,8 +169,11 @@ export const cropDashboard = asyncHandler(async (req, res) => {
   const totalRevenue = sales.reduce((sum, item) => sum + amount(item.netSaleAmount), 0);
   const acres = season.areaUnit === 'Acre' ? amount(season.totalArea) : season.areaUnit === 'Kanal' ? amount(season.totalArea) / 8 : amount(season.totalArea) / 160;
   const landPreparationCost = costsByType['Land Preparation'];
+  const fertilizerRecords = activities.filter(a => a.type === 'Fertilizer');
+  const fertilizerCost = costsByType.Fertilizer;
+  const sprayRecords = activities.filter(a => a.type === 'Spray / Pesticide');
   const timeline = [...activities.map(a => ({ id: a.id, date: a.date, title: a.title, type: a.type, detail: a.quantity ? `${a.quantity} ${a.unit || ''}`.trim() : '' })), ...yields.map(y => ({ id: y.id, date: y.date, title: `${y.harvestNumber} yield recorded`, type: 'Yield', detail: `${y.totalProduction} ${y.unit}` })), ...sales.map(s => ({ id: s.id, date: s.saleDate, title: `Sold to ${s.buyerName}`, type: 'Sale', detail: `${s.quantitySold} ${s.unit}` }))].sort(byNewestDate);
-  res.json({ season, activities, yields, sales, timeline, summary: { costsByType, totalInvestment, totalRevenue, netProfit: totalRevenue - totalInvestment, totalProduction, acres, costPerAcre: acres ? totalInvestment / acres : 0, revenuePerAcre: acres ? totalRevenue / acres : 0, profitPerAcre: acres ? (totalRevenue - totalInvestment) / acres : 0, yieldPerAcre: acres ? totalProduction / acres : 0, roi: totalInvestment ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0, irrigationCount: activities.filter(a => a.type === 'Irrigation').length, landPreparation: { totalCost: landPreparationCost, costPerAcre: acres ? landPreparationCost / acres : 0, operations: activities.filter(a => a.type === 'Land Preparation').length } } });
+  res.json({ season, activities, yields, sales, timeline, summary: { costsByType, totalInvestment, totalRevenue, netProfit: totalRevenue - totalInvestment, totalProduction, acres, costPerAcre: acres ? totalInvestment / acres : 0, revenuePerAcre: acres ? totalRevenue / acres : 0, profitPerAcre: acres ? (totalRevenue - totalInvestment) / acres : 0, yieldPerAcre: acres ? totalProduction / acres : 0, roi: totalInvestment ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0, irrigationCount: activities.filter(a => a.type === 'Irrigation').length, landPreparation: { totalCost: landPreparationCost, costPerAcre: acres ? landPreparationCost / acres : 0, operations: activities.filter(a => a.type === 'Land Preparation').length }, fertilizer: { totalCost: fertilizerCost, totalBags: fertilizerRecords.reduce((sum, item) => sum + amount(item.details?.bags), 0), applications: fertilizerRecords.length }, spray: { totalCost: costsByType['Spray / Pesticide'], applications: sprayRecords.length } } });
 });
 
 export const cropReports = asyncHandler(async (req, res) => {
