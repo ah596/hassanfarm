@@ -37,9 +37,6 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Protected><ModuleSelect /></Protected>} />
-        <Route path="/crops" element={<Protected><Crops /></Protected>} />
-        <Route path="/crops/reports" element={<Protected><CropReports /></Protected>} />
-        <Route path="/crops/:seasonId" element={<Protected><CropDashboard /></Protected>} />
         <Route path="/farm" element={<Protected><AppLayout /></Protected>}>
           <Route index element={<Dashboard />} />
           <Route path="animals" element={<Animals />} />
@@ -53,6 +50,11 @@ export default function App() {
           <Route path="profit-calculator" element={<ProfitCalculator />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
+        </Route>
+        <Route path="/crops" element={<Protected><AppLayout /></Protected>}>
+          <Route index element={<Crops />} />
+          <Route path="reports" element={<CropReports />} />
+          <Route path=":seasonId" element={<CropDashboard />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

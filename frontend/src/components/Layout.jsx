@@ -3,18 +3,32 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui';
 
-const navItems = [
-  { to: '/farm', label: 'Dashboard' },
-  { to: '/farm/animals', label: 'Animals' },
-  { to: '/farm/animals/new', label: 'Add Animal' },
-  { to: '/farm/pregnancy', label: 'Pregnancy' },
-  { to: '/farm/expenses', label: 'Expenses' },
-  { to: '/farm/feed', label: 'Feed' },
-  { to: '/farm/medicine', label: 'Medicine' },
-  { to: '/farm/sales', label: 'Sales' },
-  { to: '/farm/profit-calculator', label: 'Profit Calculator' },
-  { to: '/farm/reports', label: 'Reports' },
-  { to: '/farm/settings', label: 'Settings' }
+const navGroups = [
+  {
+    label: 'Farm',
+    prefix: '/farm',
+    items: [
+      { to: '/farm', label: 'Dashboard' },
+      { to: '/farm/animals', label: 'Animals' },
+      { to: '/farm/animals/new', label: 'Add Animal' },
+      { to: '/farm/pregnancy', label: 'Pregnancy' },
+      { to: '/farm/expenses', label: 'Expenses' },
+      { to: '/farm/feed', label: 'Feed' },
+      { to: '/farm/medicine', label: 'Medicine' },
+      { to: '/farm/sales', label: 'Sales' },
+      { to: '/farm/profit-calculator', label: 'Profit Calculator' },
+      { to: '/farm/reports', label: 'Reports' },
+      { to: '/farm/settings', label: 'Settings' },
+    ]
+  },
+  {
+    label: 'Crops',
+    prefix: '/crops',
+    items: [
+      { to: '/crops', label: 'Crop Management' },
+      { to: '/crops/reports', label: 'Crop Reports' },
+    ]
+  }
 ];
 
 export function AppLayout() {
@@ -24,6 +38,10 @@ export function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const headerRef = useRef(null);
   const closeMobileMenu = () => setMobileMenuOpen(false);
+  const activeGroup = navGroups.find(g => location.pathname.startsWith(g.prefix)) || navGroups[0];
+  const otherGroup = navGroups.find(g => g.label !== activeGroup.label);
+  const isHome = location.pathname === activeGroup.items[0].to && !location.search;
+  const handleBack = () => location.search ? navigate(location.pathname, { replace: true }) : navigate(-1);
 
   useEffect(() => {
     if (!mobileMenuOpen) return undefined;
@@ -62,14 +80,16 @@ export function AppLayout() {
             </Link>
 
             {/* Nav */}
-            <nav className="flex flex-1 flex-col gap-0.5">
-              {navItems.map(item => (
+            <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {/* Active group label */}
+              <div className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#d2b45a]/60">{activeGroup.label}</div>
+              {activeGroup.items.map(item => (
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  end={item.to === '/'}
+                  end={item.to === '/farm' || item.to === '/crops'}
                   className={({ isActive }) =>
-                    `rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${isActive || location.pathname === item.to
+                    `block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${isActive
                       ? 'bg-[#d2b45a] text-[#001e00]'
                       : 'text-[#a8d8a8] hover:bg-white/10 hover:text-white'
                     }`
@@ -78,6 +98,16 @@ export function AppLayout() {
                   {item.label}
                 </NavLink>
               ))}
+              {/* Switch to other module */}
+              <div className="mt-4">
+                <button
+                  onClick={() => navigate(otherGroup.items[0].to)}
+                  className="flex w-full items-center justify-between rounded-xl border border-white/10 px-3.5 py-2.5 text-sm font-medium text-[#a8d8a8] transition hover:bg-white/10 hover:text-white"
+                >
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#d2b45a]/60">{otherGroup.label}</span>
+                  <span className="text-xs">Switch →</span>
+                </button>
+              </div>
             </nav>
 
             {/* User panel */}
@@ -117,7 +147,7 @@ export function AppLayout() {
                   {user?.email || 'No account'}
                 </div>
                 <Button variant="secondary" className="hidden lg:inline-flex" onClick={logout}>Logout</Button>
-                {location.pathname !== '/farm' ? <Button variant="secondary" className="lg:hidden" onClick={() => navigate(-1)}>← Back</Button> : null}
+                {!isHome ? <Button variant="secondary" onClick={handleBack}>← Back</Button> : null}
                 <button
                   type="button"
                   className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#a8d8a8] text-lg text-[#001e00] transition hover:bg-[#d6f0d6] lg:hidden"
@@ -134,14 +164,15 @@ export function AppLayout() {
             {mobileMenuOpen ? (
               <div className="mt-3 rounded-2xl border border-[#a8d8a8] bg-white p-3 shadow-card lg:hidden">
                 <nav className="grid gap-0.5">
-                  {navItems.map(item => (
+                  <div className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#d2b45a]">{activeGroup.label}</div>
+                  {activeGroup.items.map(item => (
                     <NavLink
                       key={item.to}
                       to={item.to}
-                      end={item.to === '/'}
+                      end={item.to === '/farm' || item.to === '/crops'}
                       onClick={closeMobileMenu}
                       className={({ isActive }) =>
-                        `rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${isActive || location.pathname === item.to
+                        `block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${isActive
                           ? 'bg-[#001e00] text-white'
                           : 'text-[#3a8a3a] hover:bg-[#d6f0d6] hover:text-[#001e00]'
                         }`
@@ -150,6 +181,13 @@ export function AppLayout() {
                       {item.label}
                     </NavLink>
                   ))}
+                  <button
+                    onClick={() => { navigate(otherGroup.items[0].to); closeMobileMenu(); }}
+                    className="mt-2 flex w-full items-center justify-between rounded-xl border border-[#a8d8a8] px-3.5 py-2.5 text-sm font-medium text-[#3a8a3a] hover:bg-[#d6f0d6]"
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{otherGroup.label}</span>
+                    <span className="text-xs">Switch →</span>
+                  </button>
                 </nav>
                 <button
                   onClick={logout}

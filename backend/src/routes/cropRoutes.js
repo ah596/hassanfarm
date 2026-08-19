@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { protect } from '../middleware/auth.js';
-import { createActivity, createSale, createSeason, createYield, cropDashboard, cropReports, deleteActivity, deleteSale, deleteSeason, deleteYield, getSeason, listActivities, listSales, listSeasons, listYields, updateActivity, updateSeason } from '../controllers/cropController.js';
+import { createActivity, createSale, createSeason, createYield, cropDashboard, cropReports, deleteActivity, deleteSale, deleteSeason, deleteYield, getSeason, listActivities, listSales, listSeasons, listYields, updateActivity, updateSeason, updateYield } from '../controllers/cropController.js';
 
 const router = Router();
 router.use(protect);
@@ -17,6 +17,7 @@ router.put('/:seasonId/activities/:recordId', updateActivity);
 router.delete('/:seasonId/activities/:recordId', deleteActivity);
 router.get('/:seasonId/yields', listYields);
 router.post('/:seasonId/yields', createYield);
+router.put('/:seasonId/yields/:recordId', updateYield);
 router.delete('/:seasonId/yields/:recordId', deleteYield);
 router.get('/:seasonId/sales', listSales);
 router.post('/:seasonId/sales', createSale);

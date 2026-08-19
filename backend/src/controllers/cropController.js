@@ -145,8 +145,15 @@ export const listYields = asyncHandler(async (req, res) => {
 });
 export const createYield = asyncHandler(async (req, res) => {
   await ensureSeason(req.params.seasonId, req.user.uid);
-  const payload = cropYieldSchema.parse(req.body); const doc = { ...payload, totalProduction: amount(payload.totalProduction), seasonId: req.params.seasonId, userId: req.user.uid, createdAt: new Date().toISOString() };
+  const payload = cropYieldSchema.parse(req.body); const doc = { ...payload, totalProduction: amount(payload.totalProduction), calculatedProduction: amount(payload.calculatedProduction), seasonId: req.params.seasonId, userId: req.user.uid, createdAt: new Date().toISOString() };
   const ref = collectionRefs.cropYields().doc(); await ref.set(doc); res.status(201).json({ yield: { id: ref.id, ...doc } });
+});
+export const updateYield = asyncHandler(async (req, res) => {
+  const existing = await collectionRefs.cropYields().doc(req.params.recordId).get();
+  if (!existing.exists || existing.data().userId !== req.user.uid || existing.data().seasonId !== req.params.seasonId) throw new AppError('Harvest record not found', 404);
+  const payload = cropYieldSchema.parse(req.body);
+  await existing.ref.set({ ...payload, totalProduction: amount(payload.totalProduction), calculatedProduction: amount(payload.calculatedProduction) }, { merge: true });
+  res.json({ yield: toDoc(await existing.ref.get()) });
 });
 export const deleteYield = asyncHandler(async (req, res) => {
   const snap = await collectionRefs.cropYields().doc(req.params.recordId).get(); if (!snap.exists || snap.data().userId !== req.user.uid || snap.data().seasonId !== req.params.seasonId) throw new AppError('Yield record not found', 404); await snap.ref.delete(); res.json({ message: 'Yield deleted' });
@@ -173,6 +180,7 @@ export const cropDashboard = asyncHandler(async (req, res) => {
   const rentCost = season.landOwnership === 'Rented / Theka' ? amount(season.rentCost) : 0;
   const totalInvestment = activityCost + rentCost;
   const totalProduction = yields.reduce((sum, item) => sum + amount(item.totalProduction), 0);
+  const harvestTotals = yields.reduce((totals, item) => ({ ...totals, [item.unit || 'Unspecified']: (totals[item.unit || 'Unspecified'] || 0) + amount(item.totalProduction) }), {});
   const totalRevenue = sales.reduce((sum, item) => sum + amount(item.netSaleAmount), 0);
   const acres = season.areaUnit === 'Acre' ? amount(season.totalArea) : season.areaUnit === 'Kanal' ? amount(season.totalArea) / 8 : amount(season.totalArea) / 160;
   const landPreparationCost = costsByType['Land Preparation'];
@@ -181,7 +189,7 @@ export const cropDashboard = asyncHandler(async (req, res) => {
   const sprayRecords = activities.filter(a => a.type === 'Spray / Pesticide');
   const pesticideRecords = activities.filter(a => a.type === 'Pesticide Application');
   const timeline = [...activities.map(a => ({ id: a.id, date: a.date, title: a.title, type: a.type, detail: a.quantity ? `${a.quantity} ${a.unit || ''}`.trim() : '' })), ...yields.map(y => ({ id: y.id, date: y.date, title: `${y.harvestNumber} yield recorded`, type: 'Yield', detail: `${y.totalProduction} ${y.unit}` })), ...sales.map(s => ({ id: s.id, date: s.saleDate, title: `Sold to ${s.buyerName}`, type: 'Sale', detail: `${s.quantitySold} ${s.unit}` }))].sort(byNewestDate);
-  res.json({ season, activities, yields, sales, timeline, summary: { costsByType, totalInvestment, totalRevenue, netProfit: totalRevenue - totalInvestment, totalProduction, acres, costPerAcre: acres ? totalInvestment / acres : 0, revenuePerAcre: acres ? totalRevenue / acres : 0, profitPerAcre: acres ? (totalRevenue - totalInvestment) / acres : 0, yieldPerAcre: acres ? totalProduction / acres : 0, roi: totalInvestment ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0, irrigationCount: activities.filter(a => a.type === 'Irrigation').length, landPreparation: { totalCost: landPreparationCost, costPerAcre: acres ? landPreparationCost / acres : 0, operations: activities.filter(a => a.type === 'Land Preparation').length }, fertilizer: { totalCost: fertilizerCost, totalBags: fertilizerRecords.reduce((sum, item) => sum + amount(item.details?.bags), 0), applications: fertilizerRecords.length }, spray: { totalCost: costsByType['Spray / Pesticide'], applications: sprayRecords.length }, pesticide: { totalCost: costsByType['Pesticide Application'], applications: pesticideRecords.length } } });
+  res.json({ season, activities, yields, sales, timeline, summary: { costsByType, totalInvestment, totalRevenue, netProfit: totalRevenue - totalInvestment, totalProduction, harvestTotals, acres, costPerAcre: acres ? totalInvestment / acres : 0, revenuePerAcre: acres ? totalRevenue / acres : 0, profitPerAcre: acres ? (totalRevenue - totalInvestment) / acres : 0, yieldPerAcre: acres ? totalProduction / acres : 0, roi: totalInvestment ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0, irrigationCount: activities.filter(a => a.type === 'Irrigation').length, landPreparation: { totalCost: landPreparationCost, costPerAcre: acres ? landPreparationCost / acres : 0, operations: activities.filter(a => a.type === 'Land Preparation').length }, fertilizer: { totalCost: fertilizerCost, totalBags: fertilizerRecords.reduce((sum, item) => sum + amount(item.details?.bags), 0), applications: fertilizerRecords.length }, spray: { totalCost: costsByType['Spray / Pesticide'], applications: sprayRecords.length }, pesticide: { totalCost: costsByType['Pesticide Application'], applications: pesticideRecords.length } } });
 });
 
 export const cropReports = asyncHandler(async (req, res) => {

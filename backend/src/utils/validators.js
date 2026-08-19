@@ -110,12 +110,14 @@ export const cropActivitySchema = z.object({
 });
 
 export const cropYieldSchema = z.object({
-  date: z.string().min(1),
+  date: z.string().optional().nullable(),
   harvestNumber: z.string().trim().min(1).max(80),
-  totalProduction: z.coerce.number().min(0),
-  unit: z.enum(['Kg', 'Maund', 'Ton', 'Bags']),
+  totalProduction: z.coerce.number().min(0).optional().default(0),
+  unit: z.enum(['Kg', 'Maund', 'Ton', 'Bags']).optional().nullable(),
   bags: z.coerce.number().min(0).optional().default(0),
   weightPerBag: z.coerce.number().min(0).optional().default(0),
+  unitPerBag: z.enum(['Kg', 'Maund']).optional().nullable(),
+  calculatedProduction: z.coerce.number().min(0).optional().default(0),
   quality: z.string().optional().nullable(),
   moisture: z.string().optional().nullable(),
   storedQuantity: z.coerce.number().min(0).optional().default(0),
