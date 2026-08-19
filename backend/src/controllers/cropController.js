@@ -27,9 +27,11 @@ const prepareActivity = payload => {
     if (!details.activityName || !rateType || !rate) throw new AppError('Land preparation activity, rate type, and rate are required', 400);
     if (rateType === 'Per Acre') totalCost = area * rate;
     if (rateType === 'Per Round') totalCost = rounds * rate;
+    if (rateType === 'Per Hour') totalCost = amount(details.hours) * rate;
     if (rateType === 'Fixed Price') totalCost = rate;
     details.totalArea = area;
     details.rounds = rounds;
+    details.hours = amount(details.hours);
     details.rate = rate;
     details.rateType = rateType;
     details.areaUnit = details.areaUnit || 'Acre';
