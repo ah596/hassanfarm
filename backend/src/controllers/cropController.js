@@ -15,6 +15,28 @@ const ensureSeason = async (id, uid) => {
   return { id: snap.id, ...snap.data() };
 };
 const byNewestDate = (a, b) => String(b.date || b.saleDate || '').localeCompare(String(a.date || a.saleDate || ''));
+const prepareActivity = payload => {
+  const details = { ...(payload.details || {}) };
+  let totalCost = amount(payload.totalCost);
+
+  if (payload.type === 'Land Preparation') {
+    const area = amount(details.totalArea);
+    const rounds = amount(details.rounds);
+    const rate = amount(details.rate);
+    const rateType = details.rateType;
+    if (!details.activityName || !rateType || !rate) throw new AppError('Land preparation activity, rate type, and rate are required', 400);
+    if (rateType === 'Per Acre') totalCost = area * rate;
+    if (rateType === 'Per Round') totalCost = rounds * rate;
+    if (rateType === 'Fixed Price') totalCost = rate;
+    details.totalArea = area;
+    details.rounds = rounds;
+    details.rate = rate;
+    details.rateType = rateType;
+    details.areaUnit = details.areaUnit || 'Acre';
+  }
+
+  return { ...payload, details, totalCost, quantity: amount(payload.quantity) };
+};
 
 export const listSeasons = asyncHandler(async (req, res) => {
   const seasons = (await collectionRefs.cropSeasons().where('userId', '==', req.user.uid).get()).docs.map(toDoc);
@@ -58,10 +80,20 @@ export const listActivities = asyncHandler(async (req, res) => {
 export const createActivity = asyncHandler(async (req, res) => {
   await ensureSeason(req.params.seasonId, req.user.uid);
   const payload = cropActivitySchema.parse(req.body);
-  const doc = { ...payload, totalCost: amount(payload.totalCost), quantity: amount(payload.quantity), seasonId: req.params.seasonId, userId: req.user.uid, createdAt: new Date().toISOString() };
+  const doc = { ...prepareActivity(payload), seasonId: req.params.seasonId, userId: req.user.uid, createdAt: new Date().toISOString() };
   const ref = collectionRefs.cropActivities().doc();
   await ref.set(doc);
   res.status(201).json({ activity: { id: ref.id, ...doc } });
+});
+
+export const updateActivity = asyncHandler(async (req, res) => {
+  const existing = await collectionRefs.cropActivities().doc(req.params.recordId).get();
+  if (!existing.exists || existing.data().userId !== req.user.uid || existing.data().seasonId !== req.params.seasonId) throw new AppError('Activity not found', 404);
+  const payload = cropActivitySchema.parse(req.body);
+  const doc = prepareActivity(payload);
+  await existing.ref.set(doc, { merge: true });
+  const updated = await existing.ref.get();
+  res.json({ activity: toDoc(updated) });
 });
 
 export const deleteActivity = asyncHandler(async (req, res) => {
@@ -106,8 +138,9 @@ export const cropDashboard = asyncHandler(async (req, res) => {
   const totalProduction = yields.reduce((sum, item) => sum + amount(item.totalProduction), 0);
   const totalRevenue = sales.reduce((sum, item) => sum + amount(item.netSaleAmount), 0);
   const acres = season.areaUnit === 'Acre' ? amount(season.totalArea) : season.areaUnit === 'Kanal' ? amount(season.totalArea) / 8 : amount(season.totalArea) / 160;
+  const landPreparationCost = costsByType['Land Preparation'];
   const timeline = [...activities.map(a => ({ id: a.id, date: a.date, title: a.title, type: a.type, detail: a.quantity ? `${a.quantity} ${a.unit || ''}`.trim() : '' })), ...yields.map(y => ({ id: y.id, date: y.date, title: `${y.harvestNumber} yield recorded`, type: 'Yield', detail: `${y.totalProduction} ${y.unit}` })), ...sales.map(s => ({ id: s.id, date: s.saleDate, title: `Sold to ${s.buyerName}`, type: 'Sale', detail: `${s.quantitySold} ${s.unit}` }))].sort(byNewestDate);
-  res.json({ season, activities, yields, sales, timeline, summary: { costsByType, totalInvestment, totalRevenue, netProfit: totalRevenue - totalInvestment, totalProduction, acres, costPerAcre: acres ? totalInvestment / acres : 0, revenuePerAcre: acres ? totalRevenue / acres : 0, profitPerAcre: acres ? (totalRevenue - totalInvestment) / acres : 0, yieldPerAcre: acres ? totalProduction / acres : 0, roi: totalInvestment ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0, irrigationCount: activities.filter(a => a.type === 'Irrigation').length } });
+  res.json({ season, activities, yields, sales, timeline, summary: { costsByType, totalInvestment, totalRevenue, netProfit: totalRevenue - totalInvestment, totalProduction, acres, costPerAcre: acres ? totalInvestment / acres : 0, revenuePerAcre: acres ? totalRevenue / acres : 0, profitPerAcre: acres ? (totalRevenue - totalInvestment) / acres : 0, yieldPerAcre: acres ? totalProduction / acres : 0, roi: totalInvestment ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0, irrigationCount: activities.filter(a => a.type === 'Irrigation').length, landPreparation: { totalCost: landPreparationCost, costPerAcre: acres ? landPreparationCost / acres : 0, operations: activities.filter(a => a.type === 'Land Preparation').length } } });
 });
 
 export const cropReports = asyncHandler(async (req, res) => {
