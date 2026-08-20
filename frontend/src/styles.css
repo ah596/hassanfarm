@@ -28,6 +28,52 @@ body {
   @apply border border-[#a8d8a8] bg-white shadow-card;
 }
 
+/* During inline dairy editing, keep only the row editor visible; the add-entry card stays out of the way. */
+.grid:has(.dairy-table-editing) > .space-y-6 > :first-child {
+  display: none;
+}
+
+.dairy-side-actions > :first-child {
+  display: none;
+}
+
+/* Dairy supplier card: keep monthly labels and amounts on the same line. */
+[class*="bg-[#effbf2]"] {
+  background: #fafffa;
+  border-color: #a8d8a8;
+}
+
+[class*="bg-[#ccf8df]"] {
+  background: #d6f0d6;
+}
+
+[class*="text-[#006d61]"],
+[class*="text-[#43877d]"] {
+  color: #3a8a3a;
+}
+
+[class*="grid-cols-[1fr_auto]"] > span {
+  font-weight: 600;
+}
+
+[class*="grid-cols-[1fr_auto]"] > b {
+  font-weight: 700;
+}
+
+[class*="grid-cols-[1fr_auto]"] > b:last-child {
+  color: #dc2626;
+}
+
+[class*="grid-cols-[1fr_auto]"] {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center;
+}
+
+/* The supplier detail page uses sidebar module navigation, so it does not need a second Back button. */
+body:has(.dairy-side-actions) .mb-6.flex > div:last-child {
+  display: none;
+}
+
 .scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;

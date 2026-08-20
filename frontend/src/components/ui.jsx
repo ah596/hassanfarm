@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 export function Card({ children, className = '' }) {
   return <div className={`glass rounded-2xl p-4 sm:p-5 ${className}`}>{children}</div>;
 }
@@ -69,7 +71,7 @@ export function Textarea({ label, error, className = '', ...props }) {
   );
 }
 
-export function Table({ columns, rows, emptyMessage = 'No records yet.' }) {
+export function Table({ columns, rows, emptyMessage = 'No records yet.', expandedRowId, renderExpandedRow }) {
   return (
     <div className="w-full overflow-x-auto rounded-2xl border border-[#a8d8a8] bg-white shadow-card">
       <table className="w-full text-left text-sm">
@@ -84,13 +86,16 @@ export function Table({ columns, rows, emptyMessage = 'No records yet.' }) {
           </thead>
           <tbody>
             {rows.length ? rows.map((row, index) => (
-              <tr key={row.id || index} className="border-t border-[#d6f0d6] transition-colors hover:bg-[#f0faf0]">
-                {columns.map(col => (
-                  <td key={col.key} className="px-3 py-3 text-sm text-[#001e00] sm:px-5">
-                    {typeof col.render === 'function' ? col.render(row) : row[col.key] ?? '-'}
-                  </td>
-                ))}
-              </tr>
+              <Fragment key={row.id || index}>
+                <tr className="border-t border-[#d6f0d6] transition-colors hover:bg-[#f0faf0]">
+                  {columns.map(col => (
+                    <td key={col.key} className="px-3 py-3 text-sm text-[#001e00] sm:px-5">
+                      {typeof col.render === 'function' ? col.render(row) : row[col.key] ?? '-'}
+                    </td>
+                  ))}
+                </tr>
+                {row.id === expandedRowId && renderExpandedRow ? <tr className="dairy-inline-edit-row border-t border-[#d6f0d6] bg-[#f0faf0]"><td colSpan={columns.length} className="p-3 sm:p-5">{renderExpandedRow(row)}</td></tr> : null}
+              </Fragment>
             )) : (
               <tr>
                 <td className="px-5 py-12 text-center text-[#6ab86a]" colSpan={columns.length}>
