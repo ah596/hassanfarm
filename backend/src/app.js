@@ -10,6 +10,7 @@ import saleRoutes from './routes/saleRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import cropRoutes from './routes/cropRoutes.js';
+import dairyRoutes from './routes/dairyRoutes.js';
 import { errorHandler, notFound } from './middleware/error.js';
 import { initFirebaseAdmin } from './config/firebase.js';
 
@@ -37,6 +38,7 @@ app.use(['/api/sales', '/sales'], saleRoutes);
 app.use(['/api/dashboard', '/dashboard'], dashboardRoutes);
 app.use(['/api/reports', '/reports'], reportRoutes);
 app.use(['/api/crops', '/crops'], cropRoutes);
+app.use(['/api/dairy', '/dairy'], dairyRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

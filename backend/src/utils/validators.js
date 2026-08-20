@@ -137,3 +137,27 @@ export const cropSaleSchema = z.object({
   kaatPerKg: z.coerce.number().min(1).optional().default(50),
   notes: z.string().optional().nullable()
 });
+
+export const milkSupplierSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  phone: z.string().trim().max(40).optional().nullable(),
+  address: z.string().trim().max(300).optional().nullable(),
+  startDate: z.string().optional().nullable(),
+  ratePerKg: z.coerce.number().min(0).optional().default(0),
+  status: z.enum(['Active', 'Inactive']).default('Active'),
+  notes: z.string().optional().nullable()
+});
+
+export const milkEntrySchema = z.object({
+  date: z.string().min(1),
+  quantityKg: z.coerce.number().min(0),
+  ratePerKg: z.coerce.number().min(0).optional(),
+  notes: z.string().optional().nullable()
+});
+
+export const milkPaymentSchema = z.object({
+  month: z.string().regex(/^\d{4}-\d{2}$/),
+  amountPaid: z.coerce.number().min(0),
+  paymentDate: z.string().optional().nullable(),
+  notes: z.string().optional().nullable()
+});

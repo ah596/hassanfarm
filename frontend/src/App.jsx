@@ -19,6 +19,8 @@ import ModuleSelect from './pages/ModuleSelect';
 import Crops from './pages/Crops';
 import CropDashboard from './pages/CropDashboard';
 import CropReports from './pages/CropReports';
+import Dairy from './pages/Dairy';
+import DairySupplier from './pages/DairySupplier';
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -56,6 +58,8 @@ export default function App() {
           <Route path="reports" element={<CropReports />} />
           <Route path=":seasonId" element={<CropDashboard />} />
         </Route>
+        <Route path="/dairy" element={<Protected><Dairy /></Protected>} />
+        <Route path="/dairy/:supplierId" element={<Protected><DairySupplier /></Protected>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<HomeRedirect />} />

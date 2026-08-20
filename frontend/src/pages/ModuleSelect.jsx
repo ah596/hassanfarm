@@ -16,7 +16,15 @@ const modules = [
     action: 'View Crops Module',
     path: '/crops',
     icon: '🌾',
-    available: false
+    available: true
+  },
+  {
+    title: 'Dairy',
+    description: 'Manage milk suppliers, daily milk collection, rates, and payments.',
+    action: 'Open Dairy Collection',
+    path: '/dairy',
+    icon: '🥛',
+    available: true
   }
 ];
 
@@ -47,7 +55,7 @@ export default function ModuleSelect() {
           <p className="mx-auto mt-3 max-w-xl text-[#3a8a3a]">Select an area to continue with your daily operations.</p>
         </section>
 
-        <div className="grid gap-6 pb-10 md:grid-cols-2">
+        <div className="grid gap-6 pb-10 md:grid-cols-2 xl:grid-cols-3">
           {modules.map(module => (
             <button
               key={module.title}

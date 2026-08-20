@@ -12,5 +12,8 @@ export const collectionRefs = {
   cropSeasons: () => db().collection('cropSeasons'),
   cropActivities: () => db().collection('cropActivities'),
   cropYields: () => db().collection('cropYields'),
-  cropSales: () => db().collection('cropSales')
+  cropSales: () => db().collection('cropSales'),
+  milkSuppliers: () => db().collection('milkSuppliers'),
+  milkEntries: () => db().collection('milkEntries'),
+  milkPayments: () => db().collection('milkPayments')
 };
