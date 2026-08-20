@@ -149,7 +149,7 @@ export function AppLayout() {
         {/* Main */}
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header ref={headerRef} className="sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-5 py-4">
+          <header ref={headerRef} className="sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-3 py-3 sm:px-5 sm:py-4">
             <div className="flex items-center justify-between gap-3">
               {/* Mobile logo */}
               <Link to="/farm" className="flex items-center gap-2.5 lg:hidden">
@@ -161,7 +161,7 @@ export function AppLayout() {
               </Link>
               {/* Desktop title */}
               <Link to="/farm" className="hidden lg:block">
-                <div className="text-lg font-bold text-[#001e00]">Farm Operations</div>
+                <div className="text-lg font-bold text-[#001e00]">{activeGroup.label} Operations</div>
               </Link>
 
               <div className="flex items-center gap-3">
@@ -230,7 +230,7 @@ export function AppLayout() {
             ) : null}
           </header>
 
-          <div className="flex-1 p-5 md:p-7">
+          <div className="flex-1 p-3 sm:p-5 md:p-7">
             <Outlet />
           </div>
 

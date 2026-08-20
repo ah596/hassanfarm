@@ -1,5 +1,5 @@
 export function Card({ children, className = '' }) {
-  return <div className={`glass rounded-2xl p-5 ${className}`}>{children}</div>;
+  return <div className={`glass rounded-2xl p-4 sm:p-5 ${className}`}>{children}</div>;
 }
 
 export function StatCard({ title, value, hint, compact = false }) {
@@ -20,7 +20,7 @@ export function Button({ children, className = '', variant = 'primary', ...props
   };
   return (
     <button
-      className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium transition-colors duration-150 ${styles[variant]} ${className}`}
+      className={`inline-flex min-h-[42px] max-w-full items-center justify-center rounded-xl px-4 py-2.5 text-center text-sm font-medium transition-colors duration-150 ${styles[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -71,13 +71,12 @@ export function Textarea({ label, error, className = '', ...props }) {
 
 export function Table({ columns, rows, emptyMessage = 'No records yet.' }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#a8d8a8] bg-white shadow-card">
-      <div className="overflow-x-auto scrollbar">
-        <table className="min-w-full text-left text-sm">
+    <div className="w-full overflow-x-auto rounded-2xl border border-[#a8d8a8] bg-white shadow-card">
+      <table className="w-full text-left text-sm">
           <thead className="border-b border-[#a8d8a8] bg-[#f0faf0]">
             <tr>
               {columns.map(col => (
-                <th key={col.key} className="px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-[#3a8a3a]">
+                <th key={col.key} className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-[#3a8a3a] sm:px-5">
                   {col.label}
                 </th>
               ))}
@@ -87,7 +86,7 @@ export function Table({ columns, rows, emptyMessage = 'No records yet.' }) {
             {rows.length ? rows.map((row, index) => (
               <tr key={row.id || index} className="border-t border-[#d6f0d6] transition-colors hover:bg-[#f0faf0]">
                 {columns.map(col => (
-                  <td key={col.key} className="px-5 py-3.5 text-[#001e00]">
+                  <td key={col.key} className="px-3 py-3 text-sm text-[#001e00] sm:px-5">
                     {typeof col.render === 'function' ? col.render(row) : row[col.key] ?? '-'}
                   </td>
                 ))}
@@ -100,8 +99,7 @@ export function Table({ columns, rows, emptyMessage = 'No records yet.' }) {
               </tr>
             )}
           </tbody>
-        </table>
-      </div>
+      </table>
     </div>
   );
 }
@@ -110,10 +108,10 @@ export function SectionHeader({ title, subtitle, action }) {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h2 className="text-2xl font-bold text-[#001e00]">{title}</h2>
+        <h2 className="text-xl font-bold text-[#001e00] sm:text-2xl">{title}</h2>
         {subtitle ? <p className="mt-1 text-sm text-[#3a8a3a]">{subtitle}</p> : null}
       </div>
-      {action}
+      {action ? <div className="w-full sm:w-auto">{action}</div> : null}
     </div>
   );
 }
