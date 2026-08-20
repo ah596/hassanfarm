@@ -58,8 +58,10 @@ export default function App() {
           <Route path="reports" element={<CropReports />} />
           <Route path=":seasonId" element={<CropDashboard />} />
         </Route>
-        <Route path="/dairy" element={<Protected><Dairy /></Protected>} />
-        <Route path="/dairy/:supplierId" element={<Protected><DairySupplier /></Protected>} />
+        <Route path="/dairy" element={<Protected><AppLayout /></Protected>}>
+          <Route index element={<Dairy />} />
+          <Route path=":supplierId" element={<DairySupplier />} />
+        </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<HomeRedirect />} />
