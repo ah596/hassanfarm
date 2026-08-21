@@ -78,7 +78,7 @@ export function AppLayout() {
         <aside className="hidden w-64 shrink-0 flex-col bg-[#001e00] lg:flex">
           <div className="sticky top-0 flex h-screen flex-col p-6">
             {/* Logo */}
-            <Link to="/farm" className="mb-8 flex items-center gap-3">
+            <Link to="/" className="mb-8 flex items-center gap-3">
               <img src="/logo.png" alt="Goat Farm logo" className="h-10 w-10 border-0 object-contain" />
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d2b45a]">Maweshi Farm</div>
@@ -152,7 +152,7 @@ export function AppLayout() {
           <header ref={headerRef} className="sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-3 py-3 sm:px-5 sm:py-4">
             <div className="flex items-center justify-between gap-3">
               {/* Mobile logo */}
-              <Link to="/farm" className="flex items-center gap-2.5 lg:hidden">
+              <Link to="/" className="flex items-center gap-2.5 lg:hidden">
                 <img src="/logo.png" alt="Goat Farm logo" className="h-9 w-9 border-0 object-contain" />
                 <div>
                   <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#d2b45a]">Maweshi Farm</div>
@@ -160,7 +160,7 @@ export function AppLayout() {
                 </div>
               </Link>
               {/* Desktop title */}
-              <Link to="/farm" className="hidden lg:block">
+              <Link to="/" className="hidden lg:block">
                 <div className="text-lg font-bold text-[#001e00]">{activeGroup.label} Operations</div>
               </Link>
 
