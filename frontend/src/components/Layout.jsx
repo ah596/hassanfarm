@@ -75,7 +75,9 @@ export function AppLayout() {
     if (!mobileMenuOpen) return undefined;
 
     const closeOnOutsideClick = event => {
-      if (!headerRef.current?.contains(event.target)) closeMobileMenu();
+      // The fixed bottom navigation is outside the header in the DOM.  Do not
+      // close first when its Menu button is trying to toggle this drawer.
+      if (!headerRef.current?.contains(event.target) && !event.target.closest?.('.farm-mobile-tabs')) closeMobileMenu();
     };
     const closeOnEscape = event => {
       if (event.key === 'Escape') closeMobileMenu();
@@ -172,41 +174,75 @@ export function AppLayout() {
           {/* Header */}
           <header ref={headerRef} className={`sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-3 py-3 sm:px-5 sm:py-4 ${isFarmDashboard ? 'farm-layout-header' : ''}`}>
             <div className="flex items-center justify-between gap-3">
-              {/* Mobile logo */}
-              <Link to="/" className="flex items-center gap-2.5 lg:hidden">
-                <img src="/logo.png" alt="Goat Farm logo" className="h-9 w-9 border-0 object-contain" />
-                <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#d2b45a]">Maweshi Farm</div>
-                  <div className="text-base font-bold text-[#001e00]">Management</div>
-                </div>
-              </Link>
-              {/* Desktop title */}
-              <Link to="/" className="hidden lg:block">
-                <div className="text-lg font-bold text-[#001e00]">{isFarmDashboard ? 'Dashboard' : isFarmSection ? activeGroup.items.find(item => item.to === location.pathname)?.label || 'Farm Management' : `${activeGroup.label} Operations`}</div>
-              </Link>
 
-              <div className="flex items-center gap-3">
-                {isFarmSection ? <div className="farm-desktop-actions"><button aria-label="Notifications"><NavIcon name="medicine" /></button><button aria-label="Settings"><NavIcon name="settings" /></button><Link to="/farm/animals/new"><NavIcon name="add" /> Add Animal</Link></div> : null}
-                <div className={`hidden rounded-xl border border-[#a8d8a8] px-3 py-2 text-xs text-[#3a8a3a] md:block ${isFarmDashboard ? 'farm-hide-dashboard' : ''}`}>
-                  {user?.email || 'No account'}
+              {/* Left: back arrow + breadcrumb + page title */}
+              {isFarmDashboard ? <Link to="/" className="farm-dashboard-mobile-brand lg:hidden">
+                <img src="/logo.png" alt="Maweshi Farm" />
+                <span><small>Maweshi Farm</small><b>Management</b></span>
+              </Link> : null}
+              <div className={`flex min-w-0 items-center gap-2 ${isFarmDashboard ? 'hidden lg:flex' : ''}`}>
+                {!isHome && (
+                  <button
+                    onClick={handleBack}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#a8d8a8] text-[#001e00] transition hover:bg-[#d6f0d6]"
+                    aria-label="Go back"
+                  >
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <path d="M12 4 6 10l6 6"/>
+                    </svg>
+                  </button>
+                )}
+                <div className="min-w-0">
+                  {/* breadcrumb — desktop */}
+                  <div className="hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6ab86a] lg:block">
+                    {activeGroup.label} {location.pathname !== activeGroup.items[0]?.to ? `/ ${activeGroup.items.find(i => location.pathname.startsWith(i.to) && i.to !== activeGroup.items[0].to)?.label || ''}` : ''}
+                  </div>
+                  {/* page title */}
+                  <div className="truncate text-sm font-bold text-[#001e00] sm:text-base lg:text-lg">
+                    {isFarmDashboard
+                      ? 'Dashboard'
+                      : activeGroup.items.find(i => i.to !== activeGroup.items[0].to && location.pathname.startsWith(i.to))?.label
+                        || activeGroup.items.find(i => i.to === location.pathname)?.label
+                        || (isFarmSection ? 'Farm Management' : `${activeGroup.label} Operations`)}
+                  </div>
                 </div>
-                <Button variant="secondary" className={`hidden lg:inline-flex ${isFarmDashboard ? 'farm-hide-dashboard' : ''}`} onClick={logout}>Logout</Button>
-                {!isHome ? <Button variant="secondary" onClick={handleBack}>← Back</Button> : null}
+              </div>
+
+              {/* Right: actions */}
+              <div className="flex shrink-0 items-center gap-2">
+                {/* notification bell */}
+                <button
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border border-[#a8d8a8] text-[#3a8a3a] transition hover:bg-[#d6f0d6] ${isFarmDashboard ? 'hidden lg:flex' : ''}`}
+                  aria-label="Notifications"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                    <path d="M10 2a6 6 0 0 1 6 6v3l1.5 2.5H2.5L4 11V8a6 6 0 0 1 6-6Z"/><path d="M8 16a2 2 0 0 0 4 0"/>
+                  </svg>
+                </button>
+                {/* user avatar */}
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-[#001e00] text-[10px] font-bold text-white ${isFarmDashboard ? 'hidden lg:flex' : ''}`}>
+                  {(user?.displayName || user?.email || 'U').slice(0, 2).toUpperCase()}
+                </div>
+                {/* hamburger — mobile only */}
                 <button
                   type="button"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#a8d8a8] text-lg text-[#001e00] transition hover:bg-[#d6f0d6] lg:hidden"
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border border-[#a8d8a8] text-[#001e00] transition hover:bg-[#d6f0d6] lg:hidden ${isFarmDashboard ? 'hidden' : ''}`}
                   onClick={() => setMobileMenuOpen(o => !o)}
                   aria-label="Toggle navigation menu"
                   aria-expanded={mobileMenuOpen}
                 >
-                  {mobileMenuOpen ? '×' : '☰'}
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                    {mobileMenuOpen
+                      ? <path d="M4 4l12 12M16 4 4 16"/>
+                      : <path d="M3 6h14M3 10h14M3 14h14"/>}
+                  </svg>
                 </button>
               </div>
             </div>
 
             {/* Mobile menu */}
             {mobileMenuOpen ? (
-              <div className="mt-3 rounded-2xl border border-[#a8d8a8] bg-white p-3 shadow-card lg:hidden">
+              <div className="farm-mobile-sidebar lg:hidden">
                 <nav className="grid gap-0.5">
                   <div className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#d2b45a]">{activeGroup.label}</div>
                   {activeGroup.items.map(item => (
@@ -267,8 +303,8 @@ export function AppLayout() {
             <NavLink to="/farm" end><NavIcon name="dashboard"/><span>Home</span></NavLink>
             <NavLink to="/farm/animals"><NavIcon name="animals"/><span>Animals</span></NavLink>
             <NavLink to="/farm/animals/new"><NavIcon name="add"/><span>Add</span></NavLink>
-            <NavLink to="/farm/medicine"><NavIcon name="medicine"/><span>Health</span></NavLink>
-            <NavLink to="/farm/expenses"><NavIcon name="expenses"/><span>Finances</span></NavLink>
+            <NavLink to="/farm/expenses"><NavIcon name="expenses"/><span>Finance</span></NavLink>
+            <button type="button" onClick={() => setMobileMenuOpen(open => !open)} aria-label="Toggle navigation menu" aria-expanded={mobileMenuOpen}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d={mobileMenuOpen ? "M4 4l12 12M16 4 4 16" : "M3 6h14M3 10h14M3 14h14"}/></svg><span>Menu</span></button>
           </nav> : null}
         </main>
       </div>
