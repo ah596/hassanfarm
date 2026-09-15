@@ -35,6 +35,8 @@ export default function AnimalDetails() {
   const [showImageOptions, setShowImageOptions] = useState(false);
   const cameraRef = useRef(null);
   const galleryRef = useRef(null);
+  const mobileCameraRef = useRef(null);
+  const mobileGalleryRef = useRef(null);
 
   const load = async () => {
     setLoading(true);
@@ -173,8 +175,81 @@ export default function AnimalDetails() {
     reader.readAsDataURL(file);
   };
 
+  const setWeight = (change) => setForm(current => ({
+    ...current,
+    weight: Math.max(0, Number(current.weight || 0) + change)
+  }));
+
+  const totalInvestment = Number(summary?.totalInvestment || 0);
+  const currentValue = Number(summary?.salePrice || animal.purchasePrice || 0);
+  const unrealizedGain = currentValue - totalInvestment;
+  const latestBreeding = animal.breedingHistory?.length ? animal.breedingHistory[animal.breedingHistory.length - 1] : null;
+  const breedingProgress = latestBreeding && GESTATION_DAYS[animal.type]
+    ? Math.min(100, Math.max(5, ((GESTATION_DAYS[animal.type] - Math.max(Number(latestBreeding.remainingDays) || 0, 0)) / GESTATION_DAYS[animal.type]) * 100))
+    : 0;
+
   return (
-    <div className="space-y-6">
+    <>
+      <form className="animal-edit-mobile md:hidden" onSubmit={save}>
+        <div className="animal-edit-mobile-top">
+          <button type="button" onClick={() => navigate('/farm/animals')} aria-label="Back">←</button>
+          <div><span>EDIT ANIMAL · {animal.animalId}</span><b>Edit Animal Details</b></div>
+          <button type="button" onClick={() => setShowImageOptions(true)} aria-label="Upload photo">◉</button>
+        </div>
+
+        <section className="animal-edit-profile">
+          <div className="animal-edit-profile-main">
+            {form.image ? <img src={form.image} alt={animal.name || animal.animalId} /> : <div className="animal-edit-photo-placeholder">🐄</div>}
+            <div><span className="animal-edit-tag">TAG #{animal.animalId}</span><h1>{form.name || animal.breed || 'Animal profile'}</h1><p>{form.breed || 'Breed not added'} · {form.weight || 0} Kg</p><small>{form.gender} · {form.type}</small></div>
+            <button type="button" onClick={remove}>Delete</button>
+          </div>
+          <div className="animal-edit-profile-actions"><button type="button" onClick={() => setShowImageOptions(true)}>Upload / replace photo</button>{form.image ? <button type="button" className="danger" onClick={() => setForm({ ...form, image: '' })}>Remove photo</button> : null}</div>
+        </section>
+
+        <section className="animal-edit-stat-grid">
+          {[
+            ['Purchase cost', Number(animal.purchasePrice || 0)],
+            ['Total invested', totalInvestment],
+            ['Current valuation', currentValue],
+            ['Unrealized gain', unrealizedGain]
+          ].map(([label, value]) => <div key={label} className={label === 'Unrealized gain' ? (value >= 0 ? 'positive' : 'negative') : ''}><span>{label}</span><b>Rs. {value.toLocaleString()}</b></div>)}
+        </section>
+
+        <section className="animal-edit-section">
+          <h2>Animal identity &amp; specs</h2>
+          <label>Animal tag / ID<input value={form.animalId} onChange={e => setForm({ ...form, animalId: e.target.value })} required /></label>
+          <label>Animal name<input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></label>
+          <label>Animal category</label>
+          <div className="animal-edit-type-grid">{['Cow', 'Goat', 'Sheep', 'Buffalo'].map(type => <button type="button" key={type} className={form.type === type ? 'selected' : ''} onClick={() => setForm({ ...form, type })}><span>{type === 'Cow' ? '♣' : type === 'Goat' ? '♧' : type === 'Sheep' ? '✦' : '●'}</span>{type}</button>)}</div>
+          <label>Gender</label>
+          <div className="animal-edit-choice-row"><button type="button" className={form.gender === 'Female' ? 'selected' : ''} onClick={() => setForm({ ...form, gender: 'Female' })}>♀ Female (Dam)</button><button type="button" className={form.gender === 'Male' ? 'selected' : ''} onClick={() => setForm({ ...form, gender: 'Male' })}>♂ Male (Sire)</button></div>
+          <div className="animal-edit-two-col"><label>Breed<input value={form.breed} onChange={e => setForm({ ...form, breed: e.target.value })} required /></label><label>Color pattern<input value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} /></label></div>
+          <label>Current weight (Kg)</label>
+          <div className="animal-edit-weight"><button type="button" onClick={() => setWeight(-1)}>−</button><input type="number" min="0" value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })} /><button type="button" onClick={() => setWeight(1)}>+</button></div>
+          <label>Date of birth / estimated age<input type="date" value={form.dob} onChange={e => setForm({ ...form, dob: e.target.value })} /></label>
+          <label>Health condition</label>
+          <div className="animal-edit-health-row"><button type="button" className={form.status === 'Available' ? 'selected' : ''} onClick={() => setForm({ ...form, status: 'Available' })}>● Healthy</button><button type="button" className={form.status === 'Observation' ? 'selected' : ''} onClick={() => setForm({ ...form, status: 'Observation' })}>◐ Watch</button><button type="button" className={form.status === 'Treatment' ? 'selected' : ''} onClick={() => setForm({ ...form, status: 'Treatment' })}>✚ Sick</button></div>
+          <label>Physical / farm notes<textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Medical history, behaviour, vaccinations..." /></label>
+        </section>
+
+        <section className="animal-edit-section">
+          <h2>Acquisition &amp; lineage</h2>
+          <div className="animal-edit-self"><div><b>Self breed (born on farm)</b><small>Hide purchase fields when this animal was born here.</small></div><input type="checkbox" checked={form.isSelfBreed} onChange={e => setForm({ ...form, isSelfBreed: e.target.checked })} /></div>
+          {!form.isSelfBreed ? <div className="animal-edit-two-col"><label>Purchase date<input type="date" value={form.purchaseDate} onChange={e => setForm({ ...form, purchaseDate: e.target.value })} /></label><label>Purchase price (Rs.)<input type="number" min="0" value={form.purchasePrice} onChange={e => setForm({ ...form, purchasePrice: e.target.value })} /></label><label>Seller name<input value={form.sellerName} onChange={e => setForm({ ...form, sellerName: e.target.value })} /></label><label>Seller contact<input value={form.sellerContact} onChange={e => setForm({ ...form, sellerContact: e.target.value })} /></label></div> : null}
+        </section>
+
+        {animal.gender === 'Female' && GESTATION_DAYS[animal.type] ? <section className="animal-edit-section animal-edit-breeding"><h2>Breeding &amp; gestation</h2>{latestBreeding ? <><div className="animal-edit-breeding-line"><b>{latestBreeding.status}</b><span>{latestBreeding.remainingDays > 0 ? `${latestBreeding.remainingDays} days remaining` : displayDate(latestBreeding.expectedBirthDate)}</span></div><div className="animal-edit-progress"><i style={{ width: `${breedingProgress}%` }} /></div></> : <p>No breeding record saved yet. Use the desktop breeding section to add one.</p>}</section> : null}
+
+        <section className="animal-edit-section animal-edit-linked"><h2>Cost ledger &amp; linked records</h2><div><span>Feed &amp; supplies</span><b>Rs. {Number(summary?.feedCost || 0).toLocaleString()}</b></div><div><span>Medicine &amp; treatment</span><b>Rs. {Number(summary?.medicineCost || 0).toLocaleString()}</b></div><div><span>Other expenses</span><b>Rs. {Number(summary?.otherCost || 0).toLocaleString()}</b></div><div><span>Record timeline</span><b>{(animal.details?.expenses?.length || 0) + (animal.details?.feed?.length || 0) + (animal.details?.medicine?.length || 0)} records</b></div></section>
+
+        <div className="animal-edit-mobile-actions"><button type="button" onClick={() => navigate('/farm/animals')}>Cancel</button><button type="submit">Save changes</button></div>
+        <input type="file" accept="image/*" capture="environment" ref={mobileCameraRef} onChange={handleImageUpload} className="hidden" />
+        <input type="file" accept="image/*" ref={mobileGalleryRef} onChange={handleImageUpload} className="hidden" />
+      </form>
+
+      {showImageOptions ? <div className="animal-edit-upload-modal md:hidden"><div><h3>Upload photo</h3><button type="button" onClick={() => { setShowImageOptions(false); mobileCameraRef.current?.click(); }}>Take photo</button><button type="button" onClick={() => { setShowImageOptions(false); mobileGalleryRef.current?.click(); }}>Choose from gallery</button><button type="button" onClick={() => setShowImageOptions(false)}>Cancel</button></div></div> : null}
+
+    <div className="hidden md:block space-y-6">
       <SectionHeader
         title={`${animal.animalId} · ${animal.breed}`}
         subtitle={`Status: ${animal.status} · Type: ${animal.type} · Gender: ${animal.gender}${animal.parentAnimalId ? ` · Born to: ${animal.parentName || 'Mother'} (${animal.parentAnimalId})` : ''}`}
@@ -195,7 +270,7 @@ export default function AnimalDetails() {
             <Input label="Tag / Animal ID" value={form.animalId} onChange={e => setForm({ ...form, animalId: e.target.value })} required />
             <Input label="Animal Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
             <Select label="Type" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
-              <option>Cow</option><option>Goat</option><option>Sheep</option>
+              <option>Cow</option><option>Goat</option><option>Sheep</option><option>Buffalo</option>
             </Select>
             <Select label="Gender" value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })}>
               <option>Male</option><option>Female</option>
@@ -222,7 +297,7 @@ export default function AnimalDetails() {
               </>
             )}
             <Select label="Status" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-              <option>Available</option><option>Sold</option><option>Dead</option><option>Transferred</option>
+              <option>Available</option><option>Observation</option><option>Treatment</option><option>Sold</option><option>Dead</option><option>Transferred</option>
             </Select>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
@@ -375,5 +450,6 @@ export default function AnimalDetails() {
         </div>
       </Card>
     </div>
+    </>
   );
 }

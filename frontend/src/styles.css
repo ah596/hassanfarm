@@ -7,6 +7,105 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Farm dashboard reference design, isolated from Crop, Dairy and other pages. */
+.farm-dashboard { color: #10231d; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+.farm-desktop-actions { display: flex; align-items: center; gap: 12px; }.farm-desktop-actions button { width: 24px; height: 24px; color: #344a42; font-size: 13px; }.farm-desktop-actions a { display: inline-flex; height: 32px; align-items: center; padding: 0 16px; border-radius: 5px; background: #f2c744; color: #15352a; font-size: 10px; font-weight: 800; }.farm-hide-dashboard { display: none !important; }
+.farm-nav-item { display: flex; align-items: center; gap: 10px; }.farm-nav-item svg { width: 15px; height: 15px; flex: none; }
+.farm-mobile-tabs { display: none; }
+.farm-mobile-title, .farm-quick-actions, .farm-profit-strip, .farm-mobile-analytics { display: none; }
+.farm-metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.farm-metric { min-width: 0; min-height: 96px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 20px; border: 1px solid #d9dfdc; border-radius: 8px; background: white; box-shadow: 0 1px 2px rgba(12,44,34,.04); }
+.farm-metric-accent { border-right: 5px solid #25ca74; }
+.farm-label { color: #60706a; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.farm-metric-value { margin-top: 7px; color: #14251f; font-size: 25px; font-weight: 800; line-height: 1; }
+.farm-metric-hint { margin-top: 7px; color: #6b7b75; font-size: 9px; }
+.farm-metric-icon { display: grid; width: 34px; height: 34px; place-items: center; flex: 0 0 auto; border-radius: 50%; background: #ecfaf1; color: #18aa60; }
+.farm-main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+.farm-panel { border: 1px solid #d9dfdc; border-radius: 8px; background: white; padding: 18px; box-shadow: 0 1px 2px rgba(12,44,34,.04); }
+.farm-panel h2 { color: #193028; font-size: 14px; font-weight: 800; }
+.farm-placeholder-chart { display: flex; height: 205px; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; border: 1px solid #d6dce1; border-radius: 6px; background: #f1f5fb; color: #9aa3ac; font-size: 12px; }
+.farm-donut-row { display: flex; min-height: 205px; align-items: center; justify-content: center; gap: 28px; }
+.farm-donut { display: grid; width: 118px; height: 118px; place-items: center; border-radius: 50%; position: relative; }
+.farm-donut::after { content: ''; position: absolute; inset: 23px; border-radius: 50%; background: white; }
+.farm-donut span { z-index: 1; font-size: 18px; font-weight: 800; }
+.farm-legend { display: grid; gap: 10px; font-size: 11px; color: #60706a; }
+.farm-legend span { display: flex; align-items: center; gap: 7px; }.farm-legend i { width: 8px; height: 8px; border-radius: 2px; }
+.farm-activity-panel { grid-column: 1 / -1; padding: 0; overflow: hidden; }.farm-panel-heading { display: flex; align-items: center; justify-content: space-between; padding: 18px; border-bottom: 1px solid #e4e8e6; }.farm-panel-heading a { color: #276b51; font-size: 10px; font-weight: 700; }
+.farm-activity { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #edf0ee; }.farm-activity:last-child { border-bottom: 0; }.farm-activity-icon { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; }.farm-activity-icon svg { width: 14px; }.farm-activity-icon.green { background: #daf8e8; color: #20a961; }.farm-activity-icon.red { background: #fde5e5; color: #e06464; }.farm-activity-icon.blue { background: #e2ecff; color: #5486df; }.farm-activity b, .farm-activity small { display: block; }.farm-activity b { font-size: 11px; }.farm-activity small { margin-top: 2px; color: #71807b; font-size: 9px; }
+.farm-activity-icon.yellow { background: #fff0bd; color: #dba912; }.farm-activity em { margin-left: auto; color: #557068; font-size: 9px; font-style: normal; font-weight: 600; }.farm-footer-links { display: flex; gap: 18px; color: #a9bbb4; }
+.farm-error, .farm-loading { padding: 40px; border: 1px solid #d9dfdc; border-radius: 8px; background: white; text-align: center; color: #60706a; }
+.farm-chart-bars { display: flex; height: 120px; align-items: flex-end; gap: 8px; padding-top: 18px; }.farm-bar-column { display: flex; height: 100%; flex: 1; align-items: center; justify-content: flex-end; flex-direction: column; gap: 5px; }.farm-bar { width: 100%; max-width: 32px; border-radius: 3px 3px 0 0; background: #dce9ff; }.farm-bar-column span { max-width: 42px; overflow: hidden; color: #87928e; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }.farm-chart-empty { margin: auto; color: #8a9691; font-size: 11px; }
+
+@media (min-width: 1024px) {
+  .farm-dashboard-shell > div { max-width: 1400px; }.farm-dashboard-shell aside { width: 230px; }.farm-dashboard-shell aside > div { padding: 18px; }.farm-dashboard-shell aside nav a { border-radius: 5px; padding: 9px 12px; font-size: 11px; }.farm-dashboard-shell aside nav > div:first-child { font-size: 8px; }.farm-dashboard-shell aside > div > a { margin-bottom: 24px; }.farm-dashboard-shell aside > div > a img { width: 30px; height: 30px; }.farm-dashboard-shell aside > div > a div div:first-child { font-size: 8px; }.farm-dashboard-shell aside > div > a div div:last-child { font-size: 11px; text-transform: uppercase; }.farm-dashboard-shell aside nav > div:last-child { display: none; }.farm-dashboard-shell aside > div > div:last-child { margin: 16px -18px -18px; border-width: 1px 0 0; border-radius: 0; padding: 16px 18px; background: transparent; }.farm-dashboard-shell .farm-layout-header { min-height: 54px; padding: 10px 26px; }.farm-dashboard-shell .farm-layout-header .text-lg { font-size: 15px; }.farm-dashboard-shell .farm-layout-content { padding: 20px 28px 24px; }.farm-dashboard-shell .farm-layout-footer { padding-top: 7px; padding-bottom: 7px; }.farm-dashboard-shell .farm-layout-footer div { font-size: 8px; }
+}
+
+@media (max-width: 1023px) {
+  .farm-app-shell { padding-bottom: 54px; }
+  .farm-app-shell .farm-layout-footer { display: none; }
+  .farm-app-shell .farm-mobile-tabs a.active { color: #173a2e; }
+  .farm-app-shell .farm-mobile-tabs a.active svg { box-sizing: content-box; padding: 5px 12px; border-radius: 6px; background: #f3ca42; color: #173a2e; }
+  .farm-desktop-actions { display: none; }.farm-dashboard-shell { background: #f7f8f7; padding-bottom: 54px; }.farm-dashboard-shell .farm-layout-header, .farm-dashboard-shell .farm-layout-footer { display: none; }.farm-dashboard-shell .farm-layout-content { padding: 10px 11px; }.farm-mobile-title { display: flex; align-items: center; justify-content: space-between; padding: 2px 1px 11px; }.farm-mobile-title h1 { font-size: 15px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }.farm-mobile-title p { margin-top: 2px; color: #64736e; font-size: 7px; }.farm-mobile-tools { display: flex; align-items: center; gap: 8px; }.farm-mobile-tools button { display: grid; width: 25px; height: 25px; place-items: center; border-radius: 50%; background: white; color: #243a32; box-shadow: 0 1px 4px rgba(0,0,0,.08); }.farm-mobile-tools button svg { width: 12px; }.farm-mobile-tools img { width: 26px; height: 26px; border-radius: 50%; object-fit: contain; background: #073427; }
+  .farm-quick-actions { display: block; }.farm-action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 8px; }.farm-action-grid a { display: flex; min-height: 77px; align-items: center; justify-content: center; flex-direction: column; gap: 7px; border: 1px solid #e3e7e5; border-radius: 8px; background: white; color: #263b34; font-size: 8px; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.03); }.farm-action-grid span { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #eff9f1; color: #123d2d; }.farm-action-grid svg { width: 13px; }
+  .farm-metrics-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 12px; }.farm-metric { min-height: 64px; padding: 10px 11px; border-radius: 7px; }.farm-metric-icon { display: none; }.farm-metric-accent { border-right-width: 1px; }.farm-label { font-size: 7px; letter-spacing: .065em; }.farm-metric-value { margin-top: 6px; font-size: 15px; }.farm-metric-hint { margin-top: 4px; font-size: 6px; }.farm-profit-strip { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 9px 11px; border-radius: 6px; background: #073b2b; color: #efc644; }.farm-profit-strip > div { display: grid; }.farm-profit-strip > div:last-child { text-align: right; }.farm-profit-strip span { color: #9fbaaf; font-size: 6px; text-transform: uppercase; }.farm-profit-strip b { margin-top: 2px; font-size: 14px; }.farm-main-grid { display: none; }.farm-mobile-analytics { display: grid; gap: 8px; margin-top: 14px; }.farm-mobile-analytics .farm-panel { padding: 10px; border-radius: 7px; }.farm-mobile-analytics .farm-panel h2 { font-size: 8px; text-transform: uppercase; }.farm-mobile-analytics .farm-donut-row { min-height: 112px; }.farm-mobile-analytics .farm-donut { width: 78px; height: 78px; }.farm-mobile-analytics .farm-donut::after { inset: 16px; }
+  .farm-mobile-tabs { position: fixed; z-index: 30; right: 0; bottom: 0; left: 0; display: grid; height: 55px; grid-template-columns: repeat(5, 1fr); border-top: 1px solid #dce2df; background: white; box-shadow: 0 -2px 8px rgba(12,44,34,.04); }.farm-mobile-tabs a { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; color: #6c7874; font-size: 7px; font-weight: 600; }.farm-mobile-tabs a svg { width: 16px; height: 16px; }.farm-mobile-tabs a.active { color: #153b2d; }.farm-mobile-tabs a.active:first-child { color: #214c3b; }.farm-mobile-tabs a.active:first-child::before { content: ''; position: absolute; top: 0; width: 24px; height: 2px; border-radius: 0 0 2px 2px; background: #ecc43f; }
+}
+
+/* Mobile Livestock Directory — reference layout for the Animals screen. */
+@media (max-width: 767px) {
+  .animal-edit-mobile { padding: 0 0 76px; color: #163126; font-size: 10px; }
+  .animal-edit-mobile-top { display: flex; align-items: center; min-height: 43px; gap: 9px; border-bottom: 1px solid #e0e5e2; }
+  .animal-edit-mobile-top > button { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 7px; color: #1d4133; font-size: 17px; }
+  .animal-edit-mobile-top > div { min-width: 0; flex: 1; }.animal-edit-mobile-top span { display: block; color: #a97a13; font-size: 6px; font-weight: 800; letter-spacing: .13em; }.animal-edit-mobile-top b { display: block; margin-top: 1px; font-size: 12px; }
+  .animal-edit-profile,.animal-edit-section { margin-top: 8px; border: 1px solid #e2e9e6; border-radius: 9px; background: #fff; padding: 10px; box-shadow: 0 1px 4px rgba(15,48,34,.05); }
+  .animal-edit-profile-main { display: flex; align-items: flex-start; gap: 10px; }.animal-edit-profile-main img,.animal-edit-photo-placeholder { width: 88px; height: 76px; flex: 0 0 88px; border-radius: 7px; object-fit: cover; background: #e6f1e7; }.animal-edit-photo-placeholder { display: grid; place-items: center; font-size: 34px; }
+  .animal-edit-profile-main > div:nth-child(2) { min-width: 0; flex: 1; }.animal-edit-tag { color: #a47712; font-size: 6px; font-weight: 800; letter-spacing: .08em; }.animal-edit-profile h1 { margin: 2px 0; font-size: 13px; line-height: 1.1; }.animal-edit-profile p { margin: 0; color: #315e45; font-size: 8px; }.animal-edit-profile small { display: inline-block; margin-top: 4px; border-radius: 999px; background: #e4f5e5; padding: 3px 6px; color: #358043; font-size: 7px; }
+  .animal-edit-profile-main > button { border: 1px solid #ffd3d3; border-radius: 4px; padding: 4px 6px; color: #e34f55; font-size: 7px; }.animal-edit-profile-actions { display: flex; gap: 6px; margin-top: 8px; }.animal-edit-profile-actions button { border-radius: 5px; background: #eff5ff; padding: 5px 7px; color: #3c6292; font-size: 7px; font-weight: 700; }.animal-edit-profile-actions .danger { background: #fff0f0; color: #d94a4a; }
+  .animal-edit-stat-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; margin-top: 8px; }.animal-edit-stat-grid > div { min-height: 52px; border: 1px solid #e1e6e4; border-radius: 8px; background: #fff; padding: 8px; box-shadow: 0 1px 3px rgba(15,48,34,.04); }.animal-edit-stat-grid span { display: block; color: #63736c; font-size: 7px; font-weight: 700; text-transform: uppercase; }.animal-edit-stat-grid b { display: block; margin-top: 7px; color: #173929; font-size: 12px; }.animal-edit-stat-grid .positive b { color: #15803d; }.animal-edit-stat-grid .negative b { color: #dc2626; }
+  .animal-edit-section h2 { margin: 0 0 10px; color: #123727; font-size: 12px; }.animal-edit-section > label { display: block; margin-top: 8px; color: #53675e; font-size: 7px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }.animal-edit-section input:not([type=checkbox]),.animal-edit-section textarea { box-sizing: border-box; width: 100%; margin-top: 4px; border: 0; border-radius: 5px; background: #eef2ff; padding: 7px 8px; color: #243a30; font-size: 10px; outline: none; }.animal-edit-section textarea { min-height: 40px; resize: vertical; }
+  .animal-edit-type-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; margin-top: 5px; }.animal-edit-type-grid button { display: grid; min-height: 37px; place-items: center; gap: 1px; border-radius: 5px; background: #f5f7ff; color: #58676b; font-size: 7px; }.animal-edit-type-grid button span { font-size: 12px; }.animal-edit-type-grid button.selected { background: #073c2d; color: #f5cf48; }
+  .animal-edit-choice-row,.animal-edit-health-row { display: grid; grid-template-columns: repeat(2,1fr); gap: 5px; margin-top: 5px; }.animal-edit-choice-row button,.animal-edit-health-row button { border-radius: 5px; background: #f1f4ff; padding: 7px 4px; color: #526063; font-size: 8px; }.animal-edit-choice-row .selected,.animal-edit-health-row .selected { background: #e6f7e8; color: #156a35; font-weight: 800; }.animal-edit-health-row { grid-template-columns: repeat(3,1fr); }.animal-edit-health-row button:last-child.selected { background: #fff0e8; color: #d26419; }
+  .animal-edit-two-col { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }.animal-edit-two-col label { display: block; margin-top: 8px; color: #53675e; font-size: 7px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }.animal-edit-weight { display: grid; grid-template-columns: 26px 1fr 26px; gap: 0; margin-top: 4px; }.animal-edit-weight input { margin: 0 !important; border-radius: 0 !important; text-align: center; }.animal-edit-weight button { background: #eff2ff; color: #355047; font-size: 16px; }.animal-edit-weight button:first-child { border-radius: 5px 0 0 5px; }.animal-edit-weight button:last-child { border-radius: 0 5px 5px 0; }
+  .animal-edit-self { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-radius: 6px; background: #fff9e9; padding: 8px; }.animal-edit-self b { display: block; font-size: 9px; }.animal-edit-self small { display: block; margin-top: 2px; color: #7d7256; font-size: 7px; }.animal-edit-self input { width: 28px; height: 15px; accent-color: #075039; }
+  .animal-edit-breeding p { color: #5e7168; }.animal-edit-breeding-line { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 8px; }.animal-edit-breeding-line b { color: #287a43; }.animal-edit-breeding-line span { color: #577066; }.animal-edit-progress { height: 6px; margin-top: 7px; overflow: hidden; border-radius: 999px; background: #e1eee2; }.animal-edit-progress i { display: block; height: 100%; border-radius: inherit; background: #27a959; }
+  .animal-edit-linked > div { display: flex; justify-content: space-between; border-top: 1px solid #edf0ef; padding: 7px 0; color: #5d6e65; font-size: 8px; }.animal-edit-linked > div b { color: #183d2d; }
+  .animal-edit-mobile-actions { position: fixed; z-index: 31; right: 0; bottom: 55px; left: 0; display: grid; grid-template-columns: 92px 1fr; gap: 8px; border-top: 1px solid #dce2df; background: #eff3ff; padding: 9px 12px; }.animal-edit-mobile-actions button { min-height: 39px; border-radius: 6px; background: #dfe5ee; color: #4a5960; font-size: 10px; font-weight: 700; }.animal-edit-mobile-actions button:last-child { background: #07352a; color: #f3ca42; font-size: 11px; }
+  .animal-edit-upload-modal { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.48); padding: 20px; }.animal-edit-upload-modal > div { display: grid; width: min(100%,260px); gap: 8px; border-radius: 10px; background: #fff; padding: 15px; }.animal-edit-upload-modal h3 { margin: 0 0 3px; font-size: 13px; }.animal-edit-upload-modal button { border-radius: 6px; background: #07352a; padding: 9px; color: #fff; font-size: 9px; font-weight: 700; }.animal-edit-upload-modal button:last-child { background: #fff0f0; color: #d84c4c; }
+  .animals-mobile-directory { position: relative; min-height: calc(100vh - 150px); padding: 2px 2px 82px; }
+  .animals-mobile-search { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 11px; border: 1px solid #d9dfdc; border-radius: 7px; background: #fff; box-shadow: 0 1px 2px rgba(17,48,36,.04); }
+  .animals-mobile-search span { color: #536d61; font-size: 18px; line-height: 1; }
+  .animals-mobile-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #173128; font-size: 11px !important; }
+  .animals-mobile-search input::placeholder { color: #77887f; }
+  .animals-mobile-chips { display: flex; gap: 7px; overflow-x: auto; margin: 11px 0 17px; padding-bottom: 1px; scrollbar-width: none; }
+  .animals-mobile-chips::-webkit-scrollbar { display: none; }
+  .animals-mobile-chips button { flex: 0 0 auto; border: 1px solid #dce1df; border-radius: 999px; background: #fff; padding: 6px 12px; color: #4d6158; font-size: 9px; font-weight: 700; }
+  .animals-mobile-chips button.active { border-color: #123d2e; background: #123d2e; color: #fff; }
+  .animals-mobile-directory > .flex h1 { color: #122b20; font-size: 16px; font-weight: 800; }
+  .animals-mobile-directory > .flex > span { color: #563e2c; font-size: 9px; font-weight: 700; }
+  .animals-mobile-list { display: grid; gap: 9px; margin-top: 12px; }
+  .animals-mobile-card { display: flex; min-height: 72px; width: 100%; align-items: center; gap: 10px; border: 1px solid #dce2df; border-radius: 8px; background: #fff; padding: 10px 12px; box-shadow: 0 1px 3px rgba(15,46,34,.05); position: relative; }
+  .animals-mobile-card > button:first-child { display: flex; flex: 1; min-width: 0; align-items: center; gap: 10px; background: none; border: none; padding: 0; cursor: pointer; }
+  .animals-mobile-card > button:first-child:active { opacity: 0.7; }
+  .animals-mobile-card img, .animals-mobile-card > div:first-child { width: 36px !important; height: 36px !important; flex: 0 0 36px; border-radius: 50% !important; background: #e9f1ff !important; }
+  .animals-mobile-card > div:first-child { color: #204d3c !important; font-size: 0 !important; }
+  .animals-mobile-card > div:first-child::after { content: '♣'; display: grid; height: 100%; place-items: center; color: #173e2f; font-size: 15px; }
+  .animals-mobile-tag { margin-bottom: 3px; color: #70562a; font-size: 7px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+  .animals-mobile-status { border-radius: 999px; padding: 3px 6px; font-size: 7px; font-weight: 700; }
+  .animals-mobile-status.healthy { background: #e7f8e8; color: #358146; }.animals-mobile-status.attention { background: #fff0df; color: #dd8627; }
+  .animals-mobile-fab { position: fixed; right: 27px; bottom: 70px; z-index: 35; display: grid; width: 40px; height: 40px; place-items: center; border-radius: 10px; background: #9b7700; color: #fff; box-shadow: 0 4px 10px rgba(57,49,8,.25); font-size: 27px; font-weight: 300; line-height: 1; }
+
+  /* Mobile Add Animal — compact registration form reference layout. */
+  .add-animal-mobile { padding: 0 0 76px; color: #152c23; font-size: 10px; }
+  .add-animal-mobile-top { display: flex; height: 36px; align-items: center; gap: 9px; border-bottom: 1px solid #e1e5e3; }.add-animal-mobile-top button { color: #29463a; font-size: 16px; }.add-animal-mobile-top b { font-size: 12px; }.add-animal-mobile-top span { margin-left: auto; border-radius: 999px; background: #07352a; padding: 4px 7px; color: #f3ca42; font-size: 7px; font-weight: 800; }
+  .add-animal-mobile-section { margin-top: 8px; border-radius: 8px; background: #fff; padding: 10px; box-shadow: 0 1px 4px rgba(18,47,35,.05); }.add-animal-mobile-section h2 { margin: 0 0 10px; font-size: 12px; }.add-animal-mobile-label { margin-bottom: 7px; color: #51665d; font-size: 7px; font-weight: 800; letter-spacing: .04em; }.add-animal-mobile-label em { color: #9a7300; font-style: normal; }
+  .add-animal-photo-row { display: flex; align-items: center; gap: 9px; }.add-animal-photo-row img,.add-animal-photo-placeholder { width: 51px; height: 51px; flex: 0 0 51px; border-radius: 5px; object-fit: cover; background: #e4f0dd; }.add-animal-photo-placeholder { display: grid; place-items: center; font-size: 28px; }.add-animal-photo-row b,.add-animal-photo-row small { display: block; }.add-animal-photo-row b { font-size: 11px; }.add-animal-photo-row small { margin-top: 3px; color: #6d7c76; font-size: 8px; }.add-animal-photo-row button { margin-top: 5px; border-radius: 4px; background: #eaf2ff; padding: 4px 7px; color: #4e6c9e; font-size: 8px; font-weight: 700; }
+  .add-animal-mobile label { display: block; margin-top: 9px; color: #4a6156; font-size: 7px; font-weight: 800; letter-spacing: .04em; }.add-animal-mobile input,.add-animal-mobile textarea { width: 100%; margin-top: 4px; border: 0; border-radius: 5px; background: #eef2ff; padding: 7px 9px; color: #23372f; outline: 0; font-size: 10px !important; }.add-animal-mobile textarea { min-height: 37px; resize: vertical; }.add-animal-mobile input::placeholder,.add-animal-mobile textarea::placeholder { color: #99a1bd; }
+  .add-animal-tile-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-top: 5px; }.add-animal-tile-grid button { display: grid; height: 34px; place-items: center; border-radius: 5px; background: #f3f5fb; color: #375046; font-size: 13px; }.add-animal-tile-grid small { margin-top: -3px; font-size: 7px; font-weight: 700; }.add-animal-tile-grid button.selected { background: #07352a; color: #f3ca42; }
+  .add-animal-choice-row,.add-animal-status-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }.add-animal-choice-row button,.add-animal-status-row button { min-height: 25px; border-radius: 5px; background: #f2f4fb; color: #345149; font-size: 8px; font-weight: 700; }.add-animal-choice-row button.selected,.add-animal-status-row button.selected { background: #e0f6e7; color: #137242; }.add-animal-status-row { grid-template-columns: repeat(3,1fr); }.add-animal-two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .add-animal-self { display: flex; align-items: center; justify-content: space-between; gap: 10px; }.add-animal-self b,.add-animal-self small { display: block; }.add-animal-self b { font-size: 9px; }.add-animal-self small { margin-top: 2px; color: #76847e; font-size: 7px; }.add-animal-self input { width: 31px; height: 17px; margin: 0; appearance: none; border-radius: 999px; background: #dce7ff; padding: 0; }.add-animal-self input:checked { background: #0e713d; }
+  .add-animal-mobile-actions { position: fixed; z-index: 31; right: 0; bottom: 55px; left: 0; display: grid; grid-template-columns: 42px 1fr; gap: 7px; border-top: 1px solid #dce2df; background: #eff3ff; padding: 8px 12px; }.add-animal-mobile-actions > button { border-radius: 5px; background: #dfe5ee; color: #4a5960; font-size: 8px; font-weight: 700; }.add-animal-mobile-actions > button + button { width: 100%; border-radius: 5px; background: #07352a; color: #f3ca42; font-size: 10px; }
+}
+
 body {
   min-height: 100vh;
   background: #f4f7f4;
@@ -102,4 +201,108 @@ body:has(.dairy-side-actions) .mb-6.flex > div:last-child {
     max-width: 100%;
   }
 
+}
+
+/* Final dashboard palette lock: prevents legacy green utility colors leaking into the reference UI. */
+.farm-dashboard-shell {
+  --farm-ink: #12251e;
+  --farm-muted: #68766f;
+  --farm-sidebar: #07352a;
+  --farm-sidebar-muted: #b7c9c1;
+  --farm-yellow: #f3c944;
+  --farm-canvas: #f6f7f5;
+  --farm-border: #dfe4e1;
+  background: var(--farm-canvas);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+.farm-app-shell {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.farm-app-shell h1,
+.farm-app-shell h2,
+.farm-app-shell h3 {
+  color: #14271f;
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: -.018em;
+}
+.farm-app-shell .text-xs,
+.farm-app-shell .text-sm {
+  font-family: inherit;
+}
+.farm-dashboard-shell aside { background: var(--farm-sidebar) !important; }
+.farm-dashboard-shell aside nav a { color: var(--farm-sidebar-muted); }
+.farm-dashboard-shell aside nav a:hover { background: rgba(255,255,255,.06); color: white; }
+.farm-dashboard-shell aside nav a[aria-current="page"] { background: var(--farm-yellow); color: #17352b; box-shadow: 0 2px 5px rgba(0,0,0,.12); }
+.farm-dashboard-shell aside nav a svg { stroke-width: 1.7; }
+.farm-dashboard-shell .farm-layout-header { border-color: var(--farm-border); box-shadow: 0 1px 2px rgba(20,45,36,.03); }
+.farm-dashboard-shell .farm-layout-content { background: var(--farm-canvas); }
+.farm-dashboard-shell .farm-layout-footer { background: #25312d; }
+.farm-dashboard-shell .farm-metric,
+.farm-dashboard-shell .farm-panel { border-color: var(--farm-border); box-shadow: 0 1px 3px rgba(22,43,35,.035); }
+.farm-dashboard-shell .farm-metric-value,
+.farm-dashboard-shell .farm-panel h2 { color: var(--farm-ink); }
+.farm-dashboard-shell .farm-label,
+.farm-dashboard-shell .farm-metric-hint { color: var(--farm-muted); }
+.farm-desktop-actions button svg { width: 14px; height: 14px; }
+.farm-desktop-actions a svg { width: 13px; height: 13px; margin-right: 4px; }
+
+/* Apply the same desktop Farm workspace to every Farm screen. Crop and Dairy
+   keep their existing visual systems. */
+@media (min-width: 1024px) {
+  .farm-app-shell > div { max-width: 1400px; }
+  .farm-app-shell aside { width: 230px; background: #07352a !important; }
+  .farm-app-shell aside > div { padding: 18px; }
+  .farm-app-shell aside nav a { border-radius: 5px; padding: 9px 12px; font-size: 11px; color: #b7c9c1; }
+  .farm-app-shell aside nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .farm-app-shell aside nav a[aria-current="page"] { background: #f3c944; color: #17352b; box-shadow: 0 2px 5px rgba(0,0,0,.12); }
+  .farm-app-shell aside nav > div:first-child { color: #b99020; font-size: 8px; }
+  .farm-app-shell aside > div > a { margin-bottom: 24px; }
+  .farm-app-shell aside > div > a img { width: 30px; height: 30px; }
+  .farm-app-shell aside > div > a div div:first-child { font-size: 8px; }
+  .farm-app-shell aside > div > a div div:last-child { font-size: 11px; text-transform: uppercase; }
+  .farm-app-shell aside nav > div:last-child { display: none; }
+  .farm-app-shell aside > div > div:last-child { margin: 16px -18px -18px; border-width: 1px 0 0; border-radius: 0; padding: 16px 18px; background: transparent; }
+  .farm-app-shell .farm-layout-header { min-height: 54px; padding: 10px 26px; border-color: #dfe4e1; box-shadow: 0 1px 2px rgba(20,45,36,.03); }
+  .farm-app-shell .farm-layout-header .text-lg { font-size: 15px; }
+  .farm-app-shell .farm-layout-content h2 { font-size: 20px; }
+  .farm-app-shell .farm-layout-content .text-sm { font-size: 12px; }
+  .farm-app-shell .farm-layout-content label { font-size: 12px; }
+  .farm-app-shell .farm-layout-content { padding: 20px 28px 24px; background: #f6f7f5; }
+  .farm-app-shell .farm-layout-content > * { max-width: none; }
+  .farm-app-shell .farm-layout-footer { padding-top: 7px; padding-bottom: 7px; background: #25312d; }
+  .farm-app-shell .farm-layout-footer div { font-size: 8px; }
+  .farm-app-shell .glass,
+  .farm-app-shell .rounded-2xl.border { border-color: #dfe4e1; box-shadow: 0 1px 3px rgba(22,43,35,.035); }
+  .farm-app-shell .rounded-xl { border-radius: 5px; }
+  .farm-app-shell .bg-\[\#001e00\] { background-color: #07352a; }
+  .farm-app-shell .bg-\[\#d2b45a\] { background-color: #f3c944; }
+}
+
+@media (max-width: 1023px) {
+  .farm-dashboard-shell,
+  .farm-dashboard-shell main,
+  .farm-dashboard-shell .farm-layout-content,
+  .farm-dashboard-shell .farm-dashboard { background: #f7f8f6; color: #14271f; }
+  .farm-dashboard-shell .farm-metric,
+  .farm-dashboard-shell .farm-panel,
+  .farm-dashboard-shell .farm-action-grid a { border-color: #e1e4e2; background: #fff; color: #263a33; box-shadow: 0 1px 3px rgba(19,42,33,.04); }
+  .farm-dashboard-shell .farm-action-grid a:nth-child(1) span { background: #fff8dd; color: #b88d09; }
+  .farm-dashboard-shell .farm-action-grid a:nth-child(2) span { background: #eff8f1; color: #315f4b; }
+  .farm-dashboard-shell .farm-action-grid a:nth-child(3) span { background: #fff0f0; color: #c6575d; }
+  .farm-dashboard-shell .farm-metric { border-color: #e2e4e7; }
+  .farm-dashboard-shell .farm-metric-value { color: #172820; }
+  .farm-dashboard-shell .farm-metric-hint { color: #75817c; }
+  .farm-dashboard-shell .farm-profit-strip { background: #07392b; color: #f3ca42; box-shadow: none; }
+  .farm-dashboard-shell .farm-profit-strip span { color: #aabeb6; }
+  .farm-dashboard-shell .farm-mobile-analytics > .farm-label { color: #5c6964; }
+  .farm-dashboard-shell .farm-mobile-analytics .farm-panel { border-color: #e2e4e2; }
+  .farm-dashboard-shell .farm-chart-bars .farm-bar { background: #dbe7fc; }
+  .farm-dashboard-shell .farm-mobile-tabs { border-color: #e0e4e1; background: #fff; box-shadow: 0 -2px 7px rgba(25,44,37,.035); }
+  .farm-dashboard-shell .farm-mobile-tabs a { color: #7a847f; }
+  .farm-dashboard-shell .farm-mobile-tabs a.active { color: #173a2e; }
+  .farm-dashboard-shell .farm-mobile-tabs a.active:first-child::before { display: none; }
+  .farm-dashboard-shell .farm-mobile-tabs a.active svg { box-sizing: content-box; padding: 5px 12px; border-radius: 6px; background: #f3ca42; color: #173a2e; }
+  .farm-dashboard-shell .farm-mobile-tools button { background: #fff; color: #263a33; }
+  .farm-activity em { font-size: 7px; }
 }
