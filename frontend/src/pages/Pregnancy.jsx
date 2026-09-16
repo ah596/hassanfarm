@@ -16,6 +16,11 @@ function getEstimate(type, breedingDate) {
   return { due: due.toISOString().slice(0, 10), remainingDays: Math.ceil((due.getTime() - today) / 86400000) };
 }
 
+function pregnancyProgress(type, remainingDays) {
+  const totalDays = GESTATION_DAYS[type] || 1;
+  return Math.min(100, Math.max(5, ((totalDays - Math.max(0, Number(remainingDays) || 0)) / totalDays) * 100));
+}
+
 export default function Pregnancy() {
   const [animals, setAnimals] = useState([]);
   const [selectedId, setSelectedId] = useState('');
@@ -162,10 +167,10 @@ export default function Pregnancy() {
   if (loading) return <LoadingState label="Loading saved pregnancy records..." />;
 
   return (
-    <div className="space-y-6">
-      <SectionHeader title="Pregnancy" subtitle="All saved pregnancy records are shown by default. Select one animal to view only its records or add a new one." />
+    <div className="pregnancy-page space-y-6">
+      <div className="pregnancy-page-heading"><SectionHeader title="Pregnancy" subtitle="All saved pregnancy records are shown by default. Select one animal to view only its records or add a new one." /></div>
 
-      <Card>
+      <Card className="pregnancy-filter-card">
         <Select label="Filter by Female Animal" value={selectedId} onChange={e => { setSelectedId(e.target.value); setActivePanel(null); setError(''); }}>
           <option value="">All saved animals</option>
           {eligibleAnimals.map(a => <option key={a.id} value={a.id}>{a.animalId} — {a.name || a.breed} ({a.type})</option>)}
@@ -173,28 +178,30 @@ export default function Pregnancy() {
         {!eligibleAnimals.length ? <div className="mt-3 text-sm text-[#B3B3B3]">No female cows, goats, or sheep have been saved yet.</div> : null}
       </Card>
 
-      <Card>
-        <div className="mb-4 text-lg font-bold text-[#2B2B2B]">Saved Pregnancy Records</div>
+      <Card className="pregnancy-records-card">
+        <div className="pregnancy-records-heading"><div className="text-lg font-bold text-[#2B2B2B]">Saved Pregnancy Records</div><span>{pregnancyAnimals.reduce((sum, animal) => sum + (animal.breedingHistory?.length || 0), 0)} Active</span></div>
         <div className="space-y-5">
           {pregnancyAnimals.length ? pregnancyAnimals.map(animal => (
             <div key={animal.id} className="space-y-3">
               {[...animal.breedingHistory].sort((a, b) => (Number.isFinite(a.remainingDays) ? a.remainingDays : Infinity) - (Number.isFinite(b.remainingDays) ? b.remainingDays : Infinity)).map(record => (
                 <div key={record.id}>
                   {/* Mobile */}
-                  <div className="overflow-hidden rounded-2xl border border-[#d7ead7] bg-[#fbfefb] shadow-card md:hidden">
+                  <div className="pregnancy-mobile-record overflow-hidden rounded-2xl border border-[#d7ead7] bg-[#fbfefb] shadow-card md:hidden">
                     <div className="relative h-32 overflow-hidden bg-[#d6f0d6]">
                       {animal.image ? <img src={animal.image} alt={animal.name || animal.animalId} className="h-full w-full object-cover object-center" /> : <div className="flex h-full items-center justify-center text-sm font-medium text-[#3a8a3a]">No animal photo</div>}
                       <div className="absolute inset-0 bg-gradient-to-t from-[#001e00]/75 via-transparent to-transparent" />
                       <div className="absolute left-3 top-3 flex gap-1.5 text-[9px] font-bold uppercase tracking-wide">
-                        <span className="rounded-md bg-white/90 px-2 py-1 text-[#001e00]">{animal.animalId}</span>
+                        <span className="pregnancy-mobile-tag rounded-md bg-white/90 px-2 py-1 text-[#001e00]">{animal.animalId}</span>
                         <span className="rounded-md bg-[#d6f0d6]/95 px-2 py-1 text-[#001e00]">{animal.type}</span>
                       </div>
-                      <div className="absolute inset-x-3 bottom-3 text-lg font-bold text-white">{animal.name || animal.breed || animal.animalId}</div>
+
+                      <div className="absolute inset-x-3 bottom-3"><div className="text-lg font-bold text-white">{animal.name || animal.breed || animal.animalId}</div><div className="pregnancy-animal-subtitle">{animal.breed || animal.type} · Expecting #{record.pregnancyNumber || 1}</div></div>
+                      <span className="pregnancy-month-badge">Month: {Math.max(1, Math.ceil(((GESTATION_DAYS[animal.type] || 1) - Math.max(0, Number(record.remainingDays) || 0)) / 30))}</span>
                     </div>
                     <div className="space-y-1.5 p-2">
                       <div className="flex items-center justify-between gap-3 px-1 py-1">
                         <div>
-                          <div className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">Current Status</div>
+                          <div className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">✦ Trimester {Math.min(3, Math.max(1, Math.ceil(((GESTATION_DAYS[animal.type] || 1) - Math.max(0, Number(record.remainingDays) || 0)) / ((GESTATION_DAYS[animal.type] || 1) / 3))))}</div>
                           <div className="mt-0.5 text-sm font-bold text-[#001e00]">{record.status || 'Pregnant / Expecting'} · #{record.pregnancyNumber || 1}</div>
                         </div>
                         <div className="min-w-11 rounded-lg bg-[#f0faf0] px-2 py-1 text-center text-[#001e00]">
@@ -202,6 +209,9 @@ export default function Pregnancy() {
                           <div className="text-[8px] font-bold uppercase">Days</div>
                         </div>
                       </div>
+                      <div className="pregnancy-reference-progress"><div><b>✦ TRIMESTER {Math.min(3, Math.max(1, Math.ceil(((GESTATION_DAYS[animal.type] || 1) - Math.max(0, Number(record.remainingDays) || 0)) / ((GESTATION_DAYS[animal.type] || 1) / 3))))}</b><span>{record.remainingDays > 0 ? `${record.remainingDays}d left` : 'Due today'}</span></div></div>
+                      <div className="pregnancy-progress" style={{ '--pregnancy-progress': `${pregnancyProgress(animal.type, record.remainingDays)}%` }}><i style={{ width: `${pregnancyProgress(animal.type, record.remainingDays)}%` }} /><span>{Math.max(0, (GESTATION_DAYS[animal.type] || 0) - Math.max(0, Number(record.remainingDays) || 0))}D</span></div>
+                      <div className="pregnancy-mobile-exact-dates"><div><span>BREEDING DATE</span><b>{displayDate(record.breedingDate)}</b></div><div><span>◫ DUE DATE</span><b>{displayDate(record.expectedBirthDate)}</b></div><div><span>ACTUAL BIRTH</span><b>{record.outcome ? displayDate(record.outcomeDate) : displayDate(record.actualBirthDate)}</b></div></div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="rounded-xl bg-white p-1.5"><div className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">Breeding Date</div><div className="mt-0.5 font-bold text-[#001e00]">{displayDate(record.breedingDate)}</div></div>
                         <div className="rounded-xl bg-white p-1.5"><div className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">Expected Birth</div><div className="mt-0.5 font-bold text-[#001e00]">{displayDate(record.expectedBirthDate)}</div></div>
@@ -211,15 +221,15 @@ export default function Pregnancy() {
                         <span className="font-bold text-[#001e00]">{record.outcome ? `${record.outcome} · ${displayDate(record.outcomeDate)}` : displayDate(record.actualBirthDate)}</span>
                       </div>
                       {!record.outcome && !record.actualBirthDate ? (
-                        <div className="space-y-2">
+                        <div className="pregnancy-mobile-actions">
                           <Button className="w-full px-3 py-2" onClick={() => togglePanel(record.id, 'outcome', record)}>
-                            {activePanel?.recordId === record.id && activePanel?.type === 'outcome' ? 'Cancel' : 'Birth Status'}
+                            {activePanel?.recordId === record.id && activePanel?.type === 'outcome' ? 'Cancel' : '◉ Record Birth Outcome'}
                           </Button>
                           <div className="flex gap-2">
-                            <Button variant="secondary" className="flex-1 px-3 py-1.5" onClick={() => togglePanel(record.id, 'edit', record)}>
-                              {activePanel?.recordId === record.id && activePanel?.type === 'edit' ? 'Cancel Edit' : 'Edit record'}
+                            <Button variant="secondary" className="pregnancy-edit-button flex-1 px-3 py-1.5" onClick={() => togglePanel(record.id, 'edit', record)}>
+                              {activePanel?.recordId === record.id && activePanel?.type === 'edit' ? 'Cancel Edit' : <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.65" aria-hidden="true"><rect x="4" y="3" width="10" height="13" rx="1.5"/><path d="M7 7h4M7 10h2m5.5 1.5-4.2 4.2-2 .4.4-2 4.2-4.2a1.2 1.2 0 0 1 1.7 1.7Z"/></svg>}
                             </Button>
-                            <Button variant="danger" className="px-3 py-1.5" onClick={() => deleteRecord(animal, record)}>Delete</Button>
+                            <Button variant="danger" className="pregnancy-delete-button px-3 py-1.5" onClick={() => deleteRecord(animal, record)} aria-label="Delete pregnancy record"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 6h10m-7-2h4m-6 2 .7 10h6.6L14 6M9 9v4m2-4v4"/></svg></Button>
                           </div>
                           <ExpandedPanel animal={animal} record={record} />
                         </div>
@@ -264,8 +274,13 @@ export default function Pregnancy() {
         </div>
       </Card>
 
+      <button type="button" className="pregnancy-mobile-log md:hidden" onClick={() => {
+        if (!selectedAnimal) { toast('Select a female animal first.'); return; }
+        document.getElementById('pregnancy-add-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }}>⊕ &nbsp; Log Insemination</button>
+
       {selectedAnimal ? (
-        <Card>
+        <Card className="pregnancy-add-card" id="pregnancy-add-form">
           <div className="mb-4 text-lg font-bold text-[#2B2B2B]">Add pregnancy record for {selectedAnimal.name || selectedAnimal.animalId}</div>
           <form className="grid gap-4 md:grid-cols-2" onSubmit={saveAdd}>
             <Input label="Breeding / Crossing Date" type="date" value={addForm.breedingDate} onChange={e => setAddForm({ ...addForm, breedingDate: e.target.value })} required />

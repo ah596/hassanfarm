@@ -7,6 +7,24 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+@media (max-width: 767px) {
+  .pregnancy-mobile-record .space-y-1\.5 > .flex:first-child { display: none; }
+  .pregnancy-mobile-record { border-radius: 12px !important; }
+  .pregnancy-mobile-record > div:first-child { height: 140px !important; }
+  .pregnancy-mobile-record > div:nth-child(2) { padding: 12px !important; }
+  .pregnancy-mobile-record .text-lg { font-size: 16px !important; line-height: 1.1; }
+  .pregnancy-mobile-tag { border-radius: 4px !important; background: rgba(0,54,38,.88) !important; padding: 5px 8px !important; color: #fff !important; font-size: 9px !important; font-weight: 800; }
+  .pregnancy-due-badge { top: 10px; right: 10px; padding: 5px 8px; font-size: 9px; }
+  .pregnancy-month-badge { right: 10px; bottom: 10px; padding: 5px 9px; font-size: 14px; }
+  .pregnancy-animal-subtitle { margin-top: 4px; font-size: 9px; }
+  .pregnancy-reference-progress { padding: 3px 1px 0; }.pregnancy-reference-progress > div,.pregnancy-reference-progress b,.pregnancy-reference-progress span { font-size: 9px; }
+  .pregnancy-progress { height: 7px; margin: 11px 1px 18px; background: #e8edf9; }
+  .pregnancy-progress i { position: relative; background: #896c00; }.pregnancy-progress i::after { content: ''; position: absolute; top: -4px; right: -4px; width: 13px; height: 13px; border: 2px solid #896c00; border-radius: 999px; background: #fff; }
+  .pregnancy-progress span { top: 11px; left: calc(100% - 30px); border-radius: 3px; background: #896c00; padding: 2px 4px; color: #fff; font-size: 8px; }
+  .pregnancy-mobile-exact-dates { margin-top: 10px; border-radius: 9px; padding: 10px 7px; }.pregnancy-mobile-exact-dates span { font-size: 7px; }.pregnancy-mobile-exact-dates b { margin-top: 6px; font-size: 9px; }
+  .pregnancy-mobile-actions { grid-template-columns: minmax(0, 1fr) 41px 41px; gap: 7px; margin-top: 13px; }.pregnancy-mobile-actions > button,.pregnancy-mobile-actions > .flex button { min-height: 39px; border-radius: 9px; }.pregnancy-mobile-actions > button { font-size: 9px; }
+}
+
 /* Farm dashboard reference design, isolated from Crop, Dairy and other pages. */
 .farm-dashboard { color: #10231d; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
 .farm-desktop-actions { display: flex; align-items: center; gap: 12px; }.farm-desktop-actions button { width: 24px; height: 24px; color: #344a42; font-size: 13px; }.farm-desktop-actions a { display: inline-flex; height: 32px; align-items: center; padding: 0 16px; border-radius: 5px; background: #f2c744; color: #15352a; font-size: 10px; font-weight: 800; }.farm-hide-dashboard { display: none !important; }
@@ -53,6 +71,16 @@
 
 /* Mobile Livestock Directory — reference layout for the Animals screen. */
 @media (max-width: 767px) {
+  .pregnancy-mobile-record .space-y-1\.5 > .flex:first-child { display: none; }.pregnancy-reference-progress { display: block; padding: 2px 1px 0; }.pregnancy-reference-progress > div { display: flex; align-items: center; justify-content: space-between; color: #123529; font-size: 8px; }.pregnancy-reference-progress b { color: #173d2d; font-size: 8px; }.pregnancy-reference-progress span { color: #102d22; font-size: 8px; font-weight: 800; }.pregnancy-progress { margin-top: 9px; }.pregnancy-progress span { top: 8px; border-radius: 3px; background: #896c00; padding: 1px 3px; color: #fff; }
+  .pregnancy-page { padding: 0 2px 78px; }.pregnancy-page-heading { display: none; }.pregnancy-filter-card { margin: 0; border: 0; border-radius: 9px; background: #fff; padding: 11px !important; box-shadow: 0 2px 7px rgba(43,52,120,.05); }.pregnancy-filter-card label > div { color: #76829d; font-size: 8px; text-transform: uppercase; }.pregnancy-filter-card select { border: 0; border-radius: 6px; background: #eef2ff; padding: 9px 10px; color: #566581; font-size: 10px; }
+  .pregnancy-records-card { border: 0; border-radius: 0; background: transparent; padding: 0 !important; box-shadow: none; }.pregnancy-records-heading { display: flex; align-items: center; gap: 7px; margin: 14px 1px 10px; }.pregnancy-records-heading > div { color: #10245d; font-size: 13px; }.pregnancy-records-heading span { border-radius: 999px; background: #dce9ff; padding: 3px 7px; color: #21427a; font-size: 8px; font-weight: 800; }
+  .pregnancy-mobile-record { border-color: #e0e1eb !important; border-radius: 8px !important; background: #fff !important; box-shadow: 0 2px 6px rgba(48,52,86,.08) !important; }.pregnancy-mobile-record > div:first-child { height: 130px; }.pregnancy-mobile-record > div:nth-child(2) { padding: 9px !important; }.pregnancy-mobile-record > div:first-child .absolute.left-3.top-3 > span:last-child { display: none; }.pregnancy-due-badge { position: absolute; top: 9px; right: 9px; border-radius: 999px; background: #e4ca68; padding: 4px 7px; color: #695200; font-size: 8px; font-weight: 800; }.pregnancy-month-badge { position: absolute; right: 9px; bottom: 9px; border-radius: 8px; background: #f3cc42; padding: 4px 8px; color: #4d3b00; font-size: 12px; font-weight: 900; }
+  .pregnancy-animal-subtitle { margin-top: 2px; color: rgba(255,255,255,.9); font-size: 8px; font-weight: 700; }
+  .pregnancy-mobile-record .space-y-1\.5 > div:first-child { padding: 2px 0 0 !important; }.pregnancy-mobile-record .space-y-1\.5 > div:first-child > div:last-child { min-width: 48px; background: #fff9d9; color: #7c6500; }.pregnancy-mobile-record .space-y-1\.5 > .grid { gap: 5px; }.pregnancy-mobile-record .space-y-1\.5 > .grid > div { border-radius: 6px; background: #eef3ff; padding: 7px; }.pregnancy-mobile-record .space-y-1\.5 > .flex { border-radius: 6px; background: #eef3ff; padding: 7px; }.pregnancy-progress { position: relative; height: 6px; margin: 3px 1px 9px; border-radius: 999px; background: #e8e9ef; }.pregnancy-progress i { display: block; height: 100%; border-radius: inherit; background: #8b7100; }.pregnancy-progress span { position: absolute; top: -12px; left: calc(100% - 25px); color: #6a5800; font-size: 7px; font-weight: 800; }
+  .pregnancy-mobile-exact-dates { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 8px; border-radius: 7px; background: #eef3ff; padding: 8px 7px; }.pregnancy-mobile-exact-dates > div { min-width: 0; padding: 0 5px; }.pregnancy-mobile-exact-dates > div + div { border-left: 1px solid #dce4f6; }.pregnancy-mobile-exact-dates span { display: block; color: #637090; font-size: 6px; font-weight: 800; }.pregnancy-mobile-exact-dates b { display: block; margin-top: 5px; color: #213c85; font-size: 8px; white-space: nowrap; }.pregnancy-mobile-record .space-y-1\.5 > .grid,.pregnancy-mobile-record .space-y-1\.5 > .flex.items-center { display: none; }
+  .pregnancy-mobile-record .space-y-1\.5 > div:first-child > div:first-child > .mt-0\.5 { display: none; }.pregnancy-mobile-record .space-y-1\.5 > div:first-child > div:last-child > div:last-child { font-size: 0; }.pregnancy-mobile-record .space-y-1\.5 > div:first-child > div:last-child > div:last-child::after { content: 'd left'; font-size: 7px; }
+  .pregnancy-mobile-record .space-y-2 > button { min-height: 35px; border-radius: 7px; font-size: 9px; }.pregnancy-mobile-record .space-y-2 > .flex { gap: 6px; }.pregnancy-mobile-record .space-y-2 > .flex button { min-height: 35px; border-radius: 7px; font-size: 0; }.pregnancy-mobile-record .space-y-2 > .flex button::first-letter { font-size: 13px; }.pregnancy-mobile-log { display: block; margin: 15px 0 0 auto; border-radius: 999px; background: #f5ce47; padding: 11px 17px; color: #584600; box-shadow: 0 3px 8px rgba(117,89,0,.16); font-size: 9px; font-weight: 800; }.pregnancy-add-card { margin-top: 12px; }
+  .pregnancy-mobile-actions { display: grid; grid-template-columns: minmax(0,1fr) 36px 36px; gap: 6px; margin-top: 8px; }.pregnancy-mobile-actions > button { min-height: 35px; border-radius: 7px; padding: 5px !important; font-size: 8px; }.pregnancy-mobile-actions > .flex { display: contents; }.pregnancy-mobile-actions > .flex button { min-height: 35px; border-radius: 7px; padding: 5px !important; font-size: 0; }.pregnancy-mobile-actions > .flex button::first-letter { font-size: 13px; }.pregnancy-mobile-actions form { grid-column: 1 / -1; }
   .farm-mobile-sidebar { position: fixed; z-index: 29; top: 0; right: 0; bottom: 55px; left: auto; width: min(80vw, 280px); overflow-y: auto; border: 0; border-radius: 0; background: #07352a; padding: 16px 13px; box-shadow: -8px 0 28px rgba(0,0,0,.28); }.farm-mobile-sidebar-top { display: flex; align-items: center; gap: 9px; margin: -2px 1px 22px; }.farm-mobile-sidebar-top img { width: 32px; height: 32px; object-fit: contain; }.farm-mobile-sidebar-top div { flex: 1; }.farm-mobile-sidebar-top span { display: block; color: #d5b647; font-size: 7px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }.farm-mobile-sidebar-top b { display: block; margin-top: 2px; color: #fff; font-size: 13px; }.farm-mobile-sidebar-top button { display: grid; width: 29px; height: 29px; place-items: center; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; color: #d6ecdc; font-size: 20px; line-height: 1; }
   .farm-mobile-sidebar nav > div:first-child { color: #d5b647; }.farm-mobile-sidebar nav a { color: #b9d2c4 !important; }.farm-mobile-sidebar nav a[aria-current="page"] { background: #f3ca42 !important; color: #17352b !important; }.farm-mobile-sidebar nav button { border-color: rgba(255,255,255,.14) !important; color: #c8ddcf !important; }.farm-mobile-sidebar > button { border: 1px solid rgba(255,255,255,.2) !important; background: transparent !important; color: #d6ecdc !important; }
   .farm-mobile-tabs button { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; color: #6c7874; font-size: 7px; font-weight: 600; }.farm-mobile-tabs button svg { width: 16px; height: 16px; }
@@ -308,4 +336,16 @@ body:has(.dairy-side-actions) .mb-6.flex > div:last-child {
   .farm-dashboard-shell .farm-mobile-tabs a.active svg { box-sizing: content-box; padding: 5px 12px; border-radius: 6px; background: #f3ca42; color: #173a2e; }
   .farm-dashboard-shell .farm-mobile-tools button { background: #fff; color: #263a33; }
   .farm-activity em { font-size: 7px; }
+}
+
+@media (max-width: 767px) {
+  .pregnancy-mobile-record .space-y-1\.5 > .flex:first-child { display: none; }
+  .pregnancy-progress { margin: 9px 1px 12px; background: #e8edf9; }
+  .pregnancy-progress i { background: #896c00; }
+  .pregnancy-progress i::after { content: ''; position: absolute; top: -4px; right: -4px; width: 13px; height: 13px; border: 2px solid #896c00; border-radius: 999px; background: #fff; }
+  .pregnancy-progress span { top: -4px; left: calc(var(--pregnancy-progress) + 10px); transform: none; border-radius: 3px; background: #896c00; padding: 1px 4px; color: #fff; }
+  .pregnancy-mobile-exact-dates > div:nth-child(1) b { color: #21438e; }
+  .pregnancy-mobile-exact-dates > div:nth-child(2) b { color: #8a6900; }
+  .pregnancy-mobile-exact-dates > div:nth-child(3) b { color: #7b8493; }
+  .pregnancy-mobile-actions svg { width: 16px; height: 16px; }.pregnancy-edit-button { border-color: #dce6f7 !important; background: #edf4ff !important; color: #17467c !important; }.pregnancy-delete-button { border-color: #ffdfe0 !important; background: #ffeded !important; color: #e22932 !important; }
 }
