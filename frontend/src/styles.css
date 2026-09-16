@@ -338,6 +338,24 @@ body:has(.dairy-side-actions) .mb-6.flex > div:last-child {
   .farm-activity em { font-size: 7px; }
 }
 
+/* Farm typography increase applies on phones and tablets only. */
+@media (max-width: 1023px) {
+  .farm-app-shell .farm-layout-content { font-size: 14px; }
+  .farm-app-shell .farm-layout-content h1 { font-size: 23px; }
+  .farm-app-shell .farm-layout-content h2 { font-size: 18px; }
+  .farm-app-shell .farm-layout-content h3 { font-size: 16px; }
+  .farm-app-shell .farm-layout-content .text-xs { font-size: 11px; }
+  .farm-app-shell .farm-layout-content .text-sm { font-size: 13px; }
+  .farm-app-shell .farm-layout-content label { font-size: 12px; }
+  .farm-app-shell .farm-layout-content input,
+  .farm-app-shell .farm-layout-content select,
+  .farm-app-shell .farm-layout-content textarea { font-size: 13px !important; }
+  .farm-app-shell .farm-mobile-tabs a,
+  .farm-app-shell .farm-mobile-tabs button { font-size: 9px; }
+  .farm-app-shell .farm-mobile-tabs a svg,
+  .farm-app-shell .farm-mobile-tabs button svg { width: 18px; height: 18px; }
+}
+
 @media (max-width: 767px) {
   .pregnancy-mobile-record .space-y-1\.5 > .flex:first-child { display: none; }
   .pregnancy-progress { margin: 9px 1px 12px; background: #e8edf9; }
@@ -348,4 +366,25 @@ body:has(.dairy-side-actions) .mb-6.flex > div:last-child {
   .pregnancy-mobile-exact-dates > div:nth-child(2) b { color: #8a6900; }
   .pregnancy-mobile-exact-dates > div:nth-child(3) b { color: #7b8493; }
   .pregnancy-mobile-actions svg { width: 16px; height: 16px; }.pregnancy-edit-button { border-color: #dce6f7 !important; background: #edf4ff !important; color: #17467c !important; }.pregnancy-delete-button { border-color: #ffdfe0 !important; background: #ffeded !important; color: #e22932 !important; }
+}
+
+@media (max-width: 767px) {
+  .pregnancy-filter-card label > div { font-size: 10px; }
+  .pregnancy-filter-card select { font-size: 14px !important; }
+  .pregnancy-records-heading > div { font-size: 16px; }
+  .pregnancy-records-heading span { padding: 4px 8px; font-size: 10px; }
+  .pregnancy-mobile-tag { font-size: 11px !important; }
+  .pregnancy-due-badge { font-size: 10px; }
+  .pregnancy-month-badge { font-size: 15px; }
+  .pregnancy-mobile-record .text-lg { font-size: 18px !important; }
+  .pregnancy-animal-subtitle { font-size: 10px; }
+  .pregnancy-reference-progress > div,
+  .pregnancy-reference-progress b,
+  .pregnancy-reference-progress span { font-size: 11px; }
+  .pregnancy-progress span { font-size: 9px; }
+  .pregnancy-mobile-exact-dates { padding: 11px 8px; }
+  .pregnancy-mobile-exact-dates span { font-size: 8px; }
+  .pregnancy-mobile-exact-dates b { font-size: 11px; }
+  .pregnancy-mobile-actions > button { font-size: 11px; }
+  .pregnancy-mobile-actions svg { width: 18px; height: 18px; }
 }
