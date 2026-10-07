@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui';
+import { FarmRequestLoader } from './CowLoader';
 
 const navIconPaths = {
   dashboard: <><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></>,
@@ -140,14 +141,14 @@ export function AppLayout() {
               <div className="module-switch-links mt-3 grid gap-2" aria-label="Modules">
                 {navGroups.map(group => (
                   <NavLink key={group.prefix} to={group.prefix}
-                    className={() => `flex items-center justify-between rounded-xl border border-white/20 px-3 py-2 text-xs font-medium transition hover:bg-white/10 ${activeGroup.label === group.label ? 'bg-[#d2b45a] text-[#001e00]' : 'text-[#a8d8a8]'}`}>
+                    className={() => `flex items-center justify-between rounded-xl border border-white/20 px-3 py-2 text-xs font-medium transition hover:bg-white/10 ${activeGroup.label === group.label ? 'text-[#d2b45a]' : 'text-[#a8d8a8]'}`}>
                     <span>{group.label}</span><span>{activeGroup.label === group.label ? 'Active' : 'Switch'}</span>
                   </NavLink>
                 ))}
               </div>
               <button
                 onClick={logout}
-                className="mt-3 w-full rounded-xl border border-white/20 py-2 text-xs font-medium text-[#a8d8a8] transition hover:bg-white/10 hover:text-white"
+                className="module-logout mt-3 w-full py-2 text-xs font-medium transition"
               >
                 Logout
               </button>
@@ -236,17 +237,17 @@ export function AppLayout() {
                   ))}
                 </nav>
                 <div className="shrink-0 pt-3">
-                  <div className="grid gap-2" aria-label="Modules">
+                  <div className="module-switch-links grid gap-2" aria-label="Modules">
                     {navGroups.map(group => (
                       <NavLink key={group.prefix} to={group.prefix} onClick={closeMobileMenu}
-                        className={() => `flex items-center justify-between rounded-xl border border-white/20 px-3.5 py-2 text-sm font-medium ${activeGroup.label === group.label ? 'bg-[#d2b45a] text-[#001e00]' : 'text-[#c8ddcf] hover:bg-white/10'}`}>
+                        className={() => `flex items-center justify-between rounded-xl border border-white/20 px-3.5 py-2 text-sm font-medium ${activeGroup.label === group.label ? 'text-[#d2b45a]' : 'text-[#c8ddcf] hover:bg-white/10'}`}>
                         <span>{group.label}</span><span className="text-xs">{activeGroup.label === group.label ? 'Active' : 'Switch'}</span>
                       </NavLink>
                     ))}
                   </div>
                 <button
                   onClick={logout}
-                  className="mt-3 w-full rounded-xl bg-[#001e00] py-2.5 text-sm font-medium text-white transition hover:bg-[#0f3d0f]"
+                  className="module-logout mt-3 w-full py-2.5 text-sm font-medium transition"
                 >
                   Logout
                 </button>
@@ -281,6 +282,7 @@ export function AppLayout() {
           </nav>
         </main>
       </div>
+      {isFarmSection ? <FarmRequestLoader /> : null}
     </div>
   );
 }

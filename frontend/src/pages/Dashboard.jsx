@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
+import CowLoader from '../components/CowLoader';
 
 const Icon = ({ name, className = 'h-4 w-4' }) => {
   const paths = {
@@ -45,7 +46,7 @@ export default function Dashboard() {
     { icon: 'revenue', title: 'Animals Sold', detail: `${summary.soldAnimals || 0} recorded sales`, meta: money(summary.totalSales), tone: 'yellow' },
   ] : [], [summary]);
   if (error) return <div className="farm-error">{error}</div>;
-  if (!data) return <div className="farm-loading">Loading dashboard...</div>;
+  if (!data) return <CowLoader label="Loading dashboard..." />;
   return <div className="farm-dashboard">
     <div className="farm-mobile-title"><div><h1>Dashboard</h1><p>Maweshi Farm Management</p></div><div className="farm-mobile-tools"><button aria-label="Notifications"><Icon name="bell" /></button><img src="/logo.png" alt="Profile" /></div></div>
     <section className="farm-quick-actions"><div className="farm-label">Quick Actions</div><div className="farm-action-grid"><Link to="/farm/animals/new"><span><Icon name="plus" /></span>Add Animal</Link><Link to="/farm/feed"><span><Icon name="feed" /></span>Log Feed</Link><Link to="/farm/expenses"><span><Icon name="expense" /></span>Expenses</Link></div></section>

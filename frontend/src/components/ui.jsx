@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import CowLoader from './CowLoader';
 
 export function Card({ children, className = '' }) {
   return <div className={`glass rounded-2xl p-4 sm:p-5 ${className}`}>{children}</div>;
@@ -121,7 +122,8 @@ export function SectionHeader({ title, subtitle, action }) {
   );
 }
 
-export function LoadingState({ label = 'Loading...' }) {
+export function LoadingState({ label = 'Loading...', variant }) {
+  if (variant === 'farm') return <CowLoader label={label} />;
   return (
     <div className="rounded-2xl border border-[#a8d8a8] bg-white p-10 text-center text-[#6ab86a] shadow-card">
       {label}

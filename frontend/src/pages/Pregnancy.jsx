@@ -167,7 +167,7 @@ export default function Pregnancy() {
     );
   };
 
-  if (loading) return <LoadingState label="Loading saved pregnancy records..." />;
+  if (loading) return <LoadingState variant="farm" label="Loading saved pregnancy records..." />;
 
   return (
     <div className="pregnancy-page space-y-6">

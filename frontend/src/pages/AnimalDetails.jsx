@@ -132,7 +132,7 @@ export default function AnimalDetails() {
     }
   };
 
-  if (loading) return <LoadingState label="Loading animal profile..." />;
+  if (loading) return <LoadingState variant="farm" label="Loading animal profile..." />;
   if (error) return <Card><div className="text-[#2B2B2B]">{error}</div></Card>;
   if (!animal) return null;
 

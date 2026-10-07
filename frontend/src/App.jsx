@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppLayout } from './components/Layout';
 import Login from './pages/Login';
@@ -21,9 +21,12 @@ import CropDashboard from './pages/CropDashboard';
 import CropReports from './pages/CropReports';
 import Dairy from './pages/Dairy';
 import DairySupplier from './pages/DairySupplier';
+import CowLoader from './components/CowLoader';
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading && (location.pathname === '/farm' || location.pathname.startsWith('/farm/'))) return <CowLoader label="Loading Farm..." fullPage />;
   if (loading) return <div className="p-10 text-center text-[#B3B3B3]">Loading session...</div>;
   if (!user) return <Navigate to="/login" replace />;
   return children;
