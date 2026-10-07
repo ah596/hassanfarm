@@ -33,8 +33,8 @@ function MobileAnimalCard({ animal, onOpen, onEdit, onDelete }) {
         <AnimalPhoto animal={animal} />
         <div className="min-w-0 flex-1">
           <div className="animals-mobile-tag">TAG #{animal.animalId || '—'}</div>
-          <div className="truncate text-sm font-bold text-[#102b20]">{animal.name || `${animal.breed || animal.type || 'Farm'} ${animal.type || ''}`}</div>
-          <div className="mt-0.5 text-[10px] text-[#304f41]">Weight: {animal.weight ? `${animal.weight} Kg` : '—'}{animal.status ? ` · ${animal.status}` : ''}</div>
+          <div className="animals-mobile-name font-bold text-[#102b20]">{animal.name || `${animal.breed || animal.type || 'Farm'} ${animal.type || ''}`}</div>
+          <div className="animals-mobile-details mt-0.5 text-[#304f41]">Weight: {animal.weight ? `${animal.weight} Kg` : '—'}{animal.status ? ` · ${animal.status}` : ''}</div>
         </div>
         <span className={`animals-mobile-status ${status === 'Healthy' ? 'healthy' : 'attention'}`}>{status}</span>
       </button>

@@ -960,3 +960,14 @@ main:has(.crop-operations),
 }
 
 .crop-canvas .crop-type-card .crop-tile-top > span:first-child { font-weight: 900; }
+
+/* Readable animal directory text on mobile, with room for wrapped names. */
+@media (max-width: 767px) {
+  .animals-mobile-search input { font-size: 16px !important; }
+  .animals-mobile-directory > .flex > span { font-size: 12px; }
+  .animals-mobile-card { min-height: 88px; }
+  .animals-mobile-name { font-size: 16px; line-height: 21px; overflow-wrap: anywhere; }
+  .animals-mobile-tag { font-size: 11px; line-height: 15px; }
+  .animals-mobile-details { font-size: 13px; line-height: 18px; overflow-wrap: anywhere; }
+  .animals-mobile-status { flex-shrink: 0; font-size: 11px; line-height: 15px; }
+}
