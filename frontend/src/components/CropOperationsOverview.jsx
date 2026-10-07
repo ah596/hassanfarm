@@ -2,7 +2,7 @@ const money = value => `Rs. ${Number(value || 0).toLocaleString()}`;
 const groups = [
   ['Fertilizer', 'Fertilizer', ['Fertilizer'], 'green'],
   ['Pesticide Application', 'Pesticide', ['Pesticide Application'], 'teal'],
-  ['Seed & Nursery', 'Activities', ['Seed / Sowing'], 'amber'],
+  ['Seed & Nursery', 'Seeding', ['Seed / Sowing'], 'amber'],
   ['Land Prep & Laser', 'Land Preparation', ['Land Preparation'], 'stone'],
   ['Spray / Protection', 'Spray', ['Spray / Pesticide'], 'mint'],
   ['Irrigation & Tube-well', 'Activities', ['Irrigation'], 'neutral'],
@@ -11,7 +11,7 @@ const groups = [
   ['Harvesting', 'Harvesting', ['Harvesting'], 'amber'],
 ];
 export function OperationIcon({ kind = 'leaf' }) {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{kind === 'Pesticide' ? <><path d="M9 8h6v10H9zM10 5h4v3m-2-3V3m-5 7H5m14 0h-2M7 14H5m14 0h-2M7 18l-2 2m12-2 2 2"/><path d="M12 10v6"/></> : kind === 'Activities' ? <><path d="m7 5 3 3-3 3-3-3Zm10 2 3 3-3 3-3-3ZM9 14l3 3-3 3-3-3Zm9 3 2 2-2 2-2-2Z"/></> : kind === 'Land Preparation' ? <><path d="M4 13h12v5H4zm3-7h6l3 7M9 6v7m8-5h3v5h-4"/><circle cx="7" cy="18" r="3"/><circle cx="18" cy="18" r="2"/></> : kind === 'Spray' ? <><rect x="6" y="8" width="10" height="13" rx="2"/><path d="M9 8V4h4v4m3 4h3V5h2M9 13h4m-2-2v4"/></> : kind === 'clock' ? <><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></> : kind === 'finance' ? <><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 7h8m-8 5h3m3 0h2m-8 4h3m3 0h2"/></> : <><path d="M12 21v-9m0 4c-6 0-8-4-8-8 5 0 8 3 8 8Zm0-4c0-5 3-8 8-8 0 5-3 8-8 8Z"/></>}</svg>;
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{kind === 'Pesticide' ? <><path d="M9 8h6v10H9zM10 5h4v3m-2-3V3m-5 7H5m14 0h-2M7 14H5m14 0h-2M7 18l-2 2m12-2 2 2"/><path d="M12 10v6"/></> : (kind === 'Activities' || kind === 'Seeding') ? <><path d="m7 5 3 3-3 3-3-3Zm10 2 3 3-3 3-3-3ZM9 14l3 3-3 3-3-3Zm9 3 2 2-2 2-2-2Z"/></> : kind === 'Land Preparation' ? <><path d="M4 13h12v5H4zm3-7h6l3 7M9 6v7m8-5h3v5h-4"/><circle cx="7" cy="18" r="3"/><circle cx="18" cy="18" r="2"/></> : kind === 'Spray' ? <><rect x="6" y="8" width="10" height="13" rx="2"/><path d="M9 8V4h4v4m3 4h3V5h2M9 13h4m-2-2v4"/></> : kind === 'clock' ? <><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></> : kind === 'finance' ? <><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 7h8m-8 5h3m3 0h2m-8 4h3m3 0h2"/></> : <><path d="M12 21v-9m0 4c-6 0-8-4-8-8 5 0 8 3 8 8Zm0-4c0-5 3-8 8-8 0 5-3 8-8 8Z"/></>}</svg>;
 }
 export default function CropOperationsOverview({ season, summary, activities, timeline, onTab }) {
   const investment = Number(summary.totalInvestment) || 0;

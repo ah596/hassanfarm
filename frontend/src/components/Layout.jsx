@@ -62,12 +62,15 @@ export function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cropSeason, setCropSeason] = useState(null);
   const headerRef = useRef(null);
   const closeMobileMenu = () => setMobileMenuOpen(false);
   const activeGroup = navGroups.find(g => location.pathname.startsWith(g.prefix)) || navGroups[0];
   const isHome = location.pathname === activeGroup.items[0].to && !location.search;
   const isFarmSection = activeGroup.label === 'Farm';
   const isCropOperations = /^\/crops\/[^/]+$/.test(location.pathname) && location.pathname !== '/crops/reports';
+  const cropStage = isCropOperations ? new URLSearchParams(location.search).get('stage') : null;
+  const cropStageTitle = ({ Spray: 'Spray & Protection', Fertilizer: 'Fertilizer Application', 'Land Preparation': 'Land Preparation', Seeding: 'Seeding & Sowing', Pesticide: 'Pesticide Application', Activities: 'Crop Activities', Harvesting: 'Harvesting', Sales: 'Crop Sales', Timeline: 'Crop Timeline' })[cropStage];
   const isFarmDashboard = location.pathname === '/farm' && !location.search;
   const handleBack = () => location.search ? navigate(location.pathname, { replace: true }) : navigate(-1);
 
@@ -182,12 +185,13 @@ export function AppLayout() {
                   </div>
                   {/* page title */}
                   <div className="truncate text-sm font-bold text-[#001e00] sm:text-base lg:text-lg">
-                    {isCropOperations ? 'Crops Operations' : isFarmDashboard
+                    {isCropOperations ? cropStageTitle || 'Crops Operations' : isFarmDashboard
                       ? 'Dashboard'
                       : activeGroup.items.find(i => i.to !== activeGroup.items[0].to && location.pathname.startsWith(i.to))?.label
                         || activeGroup.items.find(i => i.to === location.pathname)?.label
                         || (isFarmSection ? 'Farm Management' : `${activeGroup.label} Operations`)}
                   </div>
+                  {cropStageTitle && cropSeason ? <div className="crop-stage-header-meta"><span>{cropSeason.cropName} {cropSeason.season}</span><small>· {cropSeason.totalArea} {cropSeason.areaUnit}</small></div> : null}
                 </div>
               </div>
 
@@ -203,7 +207,7 @@ export function AppLayout() {
                   </svg>
                 </button>
                 {/* user avatar */}
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-[#001e00] text-[10px] font-bold text-white ${isFarmDashboard ? 'hidden lg:flex' : ''}`}>
+                <div className={`layout-user-avatar flex h-8 w-8 items-center justify-center rounded-full bg-[#001e00] text-[10px] font-bold text-white ${isFarmDashboard ? 'hidden lg:flex' : ''}`}>
                   {(user?.displayName || user?.email || 'U').slice(0, 2).toUpperCase()}
                 </div>
               </div>
@@ -252,7 +256,7 @@ export function AppLayout() {
           </header>
 
           <div className={`flex-1 p-3 sm:p-5 md:p-7 ${isFarmDashboard ? 'farm-layout-content' : ''}`}>
-            <Outlet />
+            <Outlet context={{ setCropSeason }} />
           </div>
 
           {/* Footer */}
@@ -270,7 +274,7 @@ export function AppLayout() {
             <NavLink to="/farm/expenses" onClick={closeMobileMenu}><NavIcon name="expenses"/><span>Finance</span></NavLink>
             </> : activeGroup.items.map(item => (
               <NavLink key={item.to} to={item.to} end={item.to === activeGroup.prefix} onClick={closeMobileMenu}>
-                <NavIcon name={item.icon}/><span>{item.label}</span>
+                <NavIcon name={item.icon}/><span>{cropStageTitle && item.to === '/crops' ? 'Crop Mgmt' : item.label}</span>
               </NavLink>
             ))}
             <button type="button" onClick={() => setMobileMenuOpen(open => !open)} aria-label="Toggle navigation menu" aria-expanded={mobileMenuOpen}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d={mobileMenuOpen ? "M4 4l12 12M16 4 4 16" : "M3 6h14M3 10h14M3 14h14"}/></svg><span>Menu</span></button>

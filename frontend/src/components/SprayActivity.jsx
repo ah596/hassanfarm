@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import api from '../lib/api';
-import { Button, Card, Input, Select, StatCard, Table, Textarea } from './ui';
+import { Input, Select, Textarea } from './ui';
+import { StageForm, StageHistory, StageSave, StageSection, StageSummary, StageTotal } from './CropStageUI';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
@@ -8,13 +9,14 @@ const money = value => `Rs. ${Number(value || 0).toLocaleString()}`;
 const ordinal = value => { const n = Number(value); if (!n) return ''; const suffix = n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th'; return `${n}${suffix} Spray`; };
 const defaultForm = applicationNumber => ({ applicationNumber, customApplication: '', date: '', receiptImage: '', productName: '', productAmount: '', labourCost: '', otherCost: '', products: [], notes: '' });
 
-export default function SprayActivity({ seasonId, activities, summary, onSaved }) {
+export default function SprayActivity({ seasonId, activities, summary, acres, onSaved }) {
   const sprays = activities.filter(item => item.type === 'Spray / Pesticide');
   const nextNumber = () => ordinal(sprays.length + 1);
   const applicationOptions = Array.from({ length: Math.max(sprays.length + 3, 10) }, (_, index) => ordinal(index + 1));
   const [form, setForm] = useState(() => defaultForm(nextNumber()));
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const receiptInput = useRef(null);
   const update = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
   const productRowsAmount = useMemo(() => form.products.reduce((total, item) => total + (Number(item.price) || 0), 0), [form.products]);
   const productAmount = (Number(form.productAmount) || 0) || productRowsAmount;
@@ -29,23 +31,25 @@ export default function SprayActivity({ seasonId, activities, summary, onSaved }
   const remove = async id => { const answer = await Swal.fire({ title: 'Delete spray record?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', cancelButtonColor: '#001e00' }); if (!answer.isConfirmed) return; try { await api.delete(`/crops/${seasonId}/activities/${id}`); toast.success('Spray deleted'); await onSaved(); } catch (err) { toast.error(err.response?.data?.message || err.message); } };
   const showDetails = row => Swal.fire({ title: row.details?.applicationNumber || 'Spray details', html: `<div style="text-align:left"><p><b>Product amount:</b> ${money(row.details?.productAmount)}</p><p><b>Labour charges:</b> ${money(row.details?.labourCost)}</p><p><b>Other charges:</b> ${money(row.details?.otherCost)}</p><p><b>Total:</b> ${money(row.totalCost)}</p><p><b>Notes:</b> ${row.notes || '—'}</p></div>`, confirmButtonColor: '#001e00' });
   const showBill = image => Swal.fire({ title: 'Spray image', imageUrl: image, imageAlt: 'Spray bill or image', confirmButtonColor: '#001e00' });
-  return <div className="space-y-6">
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><StatCard title="Total spray expense" value={money(summary?.totalCost)} /><StatCard title="Spray applications" value={summary?.applications || 0} /></div>
-    <div className="grid gap-6 xl:grid-cols-[1fr_1.65fr]">
-      <Card><form className="grid gap-4" onSubmit={save}>
-        <div className="text-lg font-bold text-[#001e00]">{editingId ? 'Edit spray' : 'Add spray'}</div>
-        <Select label="Spray / Application Number *" value={form.applicationNumber} onChange={update('applicationNumber')}>{applicationOptions.map(option => <option key={option}>{option}</option>)}<option>Custom</option></Select>
-        {form.applicationNumber === 'Custom' ? <Input label="Custom spray number" value={form.customApplication} onChange={update('customApplication')} required /> : null}
-        <Input label="Date" type="date" value={form.date} onChange={update('date')} required />
-        <div><div className="mb-1.5 text-sm font-medium text-[#001e00]">Upload picture (optional)</div><input type="file" accept="image/*" capture="environment" onChange={readReceipt} className="block w-full text-sm text-[#3a8a3a]" />{form.receiptImage ? <img src={form.receiptImage} alt="Spray preview" className="mt-3 h-32 rounded-xl border border-[#a8d8a8] object-cover" /> : null}</div>
-        <Input label="Product / spray name (optional)" value={form.productName} onChange={update('productName')} />
-        <Input label="Total Amount (Rs.)" type="number" min="0" value={form.productAmount} onChange={update('productAmount')} placeholder={productRowsAmount ? String(productRowsAmount) : '0'} />
-        <div className="rounded-xl border border-[#a8d8a8] p-3"><div className="mb-2 flex items-center justify-between"><div className="text-sm font-semibold text-[#001e00]">Extra products (optional)</div><button type="button" onClick={addProduct} aria-label="Add product" className="flex h-7 w-7 items-center justify-center rounded-full bg-[#001e00] text-lg font-semibold text-white hover:bg-[#0f3d0f]">+</button></div>{form.products.map((item, index) => <div className="mb-2 grid grid-cols-[1fr_70px_90px_auto] gap-2" key={index}><input value={item.name} onChange={event => updateProduct(index, 'name', event.target.value)} placeholder="Product" className="rounded-lg border border-[#a8d8a8] px-2 text-sm" /><input value={item.quantity} onChange={event => updateProduct(index, 'quantity', event.target.value)} placeholder="Qty" className="rounded-lg border border-[#a8d8a8] px-2 text-sm" /><input value={item.price} onChange={event => updateProduct(index, 'price', event.target.value)} placeholder="Rs." type="number" className="rounded-lg border border-[#a8d8a8] px-2 text-sm" /><button type="button" className="text-sm text-red-700" onClick={() => removeProduct(index)}>×</button></div>)}</div>
-        <Input label="Spray karne wale ke charges (Rs.)" type="number" min="0" value={form.labourCost} onChange={update('labourCost')} /><Input label="Other charges (Rs.)" type="number" min="0" value={form.otherCost} onChange={update('otherCost')} />
-        <div className="rounded-xl bg-[#f0faf0] p-4"><div className="text-sm text-[#3a8a3a]">Total spray expense</div><div className="mt-1 text-xl font-bold text-[#001e00]">{money(total)}</div></div><Textarea label="Notes" rows="2" value={form.notes} onChange={update('notes')} />
-        <div className="flex gap-2"><Button type="submit" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update spray' : 'Save spray'}</Button>{editingId ? <Button type="button" variant="secondary" onClick={reset}>Cancel</Button> : null}</div>
-      </form></Card>
-      <Table rows={sprays} columns={[{ key: 'number', label: 'Spray no.', render: row => row.details?.applicationNumber }, { key: 'date', label: 'Date', render: row => row.date || '-' }, { key: 'picture', label: 'Picture', render: row => row.details?.receiptImage ? <Button variant="secondary" onClick={() => showBill(row.details.receiptImage)}>View</Button> : '-' }, { key: 'amount', label: 'Total amount', render: row => money(row.details?.productAmount) }, { key: 'labour', label: 'Labour', render: row => money(row.details?.labourCost) }, { key: 'total', label: 'Total', render: row => money(row.totalCost) }, { key: 'actions', label: 'Actions', render: row => <div className="flex gap-2"><Button variant="secondary" onClick={() => showDetails(row)}>Details</Button><Button variant="secondary" onClick={() => edit(row)}>Edit</Button><Button variant="danger" onClick={() => remove(row.id)}>Delete</Button></div> }]} emptyMessage="No spray applications yet." />
+  const suggestedProducts = [...new Set(['Vitako', 'Belt Expert', 'Cartap 40', 'Tricyclazole', ...sprays.map(row => row.details?.productName).filter(Boolean)])];
+  return <div className="crop-stage-screen">
+    <StageSummary title="Total spray cost" value={money(summary?.totalCost)} hint={acres ? `Avg ${money(Number(summary?.totalCost || 0) / acres)} / Acre` : 'No land area recorded'} badge={<>{nextNumber()}<small>Next application</small></>}>
+      <div className="crop-stage-progress"><div><b>{sprays.length} sprays logged</b><span>{nextNumber()} next</span></div><div className="crop-stage-progress-bars">{Array.from({ length: Math.max(sprays.length + 1, 3) }, (_, index) => <span key={index} className={index < sprays.length ? 'complete' : ''} />)}</div><div className="crop-stage-progress-labels"><span>Completed applications</span><span>Next spray</span></div></div>
+    </StageSummary>
+    <div className="crop-stage-columns">
+      <StageForm title={editingId ? 'Edit Spray Log' : 'Quick Spray Log'} onSubmit={save} icon="Spray">
+        <StageSection title="Application & Timing"><div className="crop-stage-field-pair"><Select label="Spray stage" required value={form.applicationNumber} onChange={update('applicationNumber')}>{applicationOptions.map(option => <option key={option} value={option}>{option}{option === nextNumber() ? ' (Current)' : ''}</option>)}<option>Custom</option></Select><Input label="Date" type="date" value={form.date} onChange={update('date')} required /></div>{form.applicationNumber === 'Custom' && <Input label="Custom spray number" value={form.customApplication} onChange={update('customApplication')} required />}</StageSection>
+        <StageSection title="Chemical & Photo" action={<button type="button" className="crop-stage-bill-button" onClick={() => receiptInput.current?.click()}>▣ Add Bottle Slip</button>}>
+          <input ref={receiptInput} type="file" accept="image/*" capture="environment" onChange={readReceipt} className="sr-only" aria-label="Upload spray receipt" />
+          <Input aria-label="Product / spray name" value={form.productName} onChange={update('productName')} placeholder="Product / spray name" />
+          <div className="crop-stage-product-chips">{suggestedProducts.map(name => <button type="button" key={name} onClick={() => setForm(current => ({ ...current, productName: name }))}>{name}</button>)}</div>
+          {form.receiptImage && <div className="crop-stage-receipt"><img src={form.receiptImage} alt="Spray receipt preview" /><button type="button" onClick={() => { setForm(current => ({ ...current, receiptImage: '' })); if (receiptInput.current) receiptInput.current.value = ''; }}>Remove image</button></div>}
+        </StageSection>
+        <StageSection title="Cost Summary"><div className="crop-stage-field-pair"><Input label="Labour cost" type="number" min="0" step="0.01" value={form.labourCost} onChange={update('labourCost')} placeholder="Rs. 0" /><Input label="Chemical cost" type="number" min="0" step="0.01" value={form.productAmount} onChange={update('productAmount')} placeholder={productRowsAmount ? String(productRowsAmount) : 'Rs. 0'} /></div><StageTotal total={total} hint="Labour + Chemical + Other" /></StageSection>
+        <details className="crop-stage-extras"><summary>Extra products, other charges & notes</summary><div className="crop-stage-extra-fields"><button type="button" onClick={addProduct} className="crop-stage-bill-button">+ Add product</button>{form.products.map((item, index) => <div className="crop-stage-extra-product" key={index}><Input aria-label={`Product ${index + 1}`} value={item.name} onChange={event => updateProduct(index, 'name', event.target.value)} placeholder="Product" /><Input aria-label={`Quantity ${index + 1}`} value={item.quantity} onChange={event => updateProduct(index, 'quantity', event.target.value)} placeholder="Qty" /><Input aria-label={`Price ${index + 1}`} value={item.price} onChange={event => updateProduct(index, 'price', event.target.value)} placeholder="Rs." type="number" min="0" /><button type="button" aria-label={`Remove product ${index + 1}`} onClick={() => removeProduct(index)}>×</button></div>)}<Input label="Other charges (Rs.)" type="number" min="0" value={form.otherCost} onChange={update('otherCost')} /><Textarea label="Notes" rows="2" value={form.notes} onChange={update('notes')} /></div></details>
+        <StageSave saving={saving} editing={editingId} total={total} label="Spray" onCancel={() => reset()} />
+      </StageForm>
+      <StageHistory title="Past sprays history" rows={sprays} renderSubtitle={row => row.notes || 'Spray / Protection'} renderBreakdown={row => `Labour: ${money(row.details?.labourCost)} · Chem: ${money(row.details?.productAmount)}`} onView={showDetails} onImage={showBill} onEdit={edit} onDelete={remove} emptyMessage="No spray applications yet." />
     </div>
   </div>;
 }

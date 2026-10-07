@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
 import api from '../lib/api';
-import { Button, Card, Input, LoadingState, SectionHeader, Select, StatCard, Table, Textarea } from '../components/ui';
+import { Button, Card, Input, LoadingState, Select, Textarea } from '../components/ui';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import FertilizerActivity from '../components/FertilizerActivity';
@@ -9,11 +9,13 @@ import SprayActivity from '../components/SprayActivity';
 import PesticideActivity from '../components/PesticideActivity';
 import HarvestingActivity from '../components/HarvestingActivity';
 import CropOperationsOverview from '../components/CropOperationsOverview';
+import SeedingActivity from '../components/SeedingActivity';
+import { StageForm, StageHistory, StageSave, StageSection, StageSummary, StageTotal } from '../components/CropStageUI';
 
 const landActivities = ['Haal / Ploughing', 'Rotavator / Roter', 'Disc', 'Khalain / Ridger', 'Laser Leveling', 'Kadu / Cultivator', 'Suhaga / Planker', 'Bed Maker', 'Other / Custom Activity'];
 const activityTypes = ['Seed / Sowing', 'Irrigation', 'Labour', 'Machinery', 'Other Expense', 'Harvesting'];
 const money = value => `Rs. ${Number(value || 0).toLocaleString()}`;
-const genericBlank = { type: 'Fertilizer', date: '', title: '', quantity: '', unit: '', totalCost: '', notes: '' };
+const genericBlank = { type: 'Seed / Sowing', date: '', title: '', quantity: '', unit: '', totalCost: '', notes: '' };
 const yieldBlank = { date: '', harvestNumber: '1st Harvest', totalProduction: '', unit: 'Maund', bags: '0', weightPerBag: '0', quality: '', moisture: '', storedQuantity: '0', soldQuantity: '0', notes: '' };
 const toKg = { Kg: 1, Maund: 40, Ton: 1000 };
 const calcKaat = (qty, unit, wpb, applyKaat, deductKg, perKg) => {
@@ -28,8 +30,12 @@ const saleBlank = { saleDate: '', buyerName: '', unit: 'Maund', quantitySold: ''
 export default function CropDashboard() {
   const { seasonId } = useParams();
   const navigate = useNavigate();
+  const { setCropSeason } = useOutletContext() || {};
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState(null);
-  const [tab, setTab] = useState('Overview');
+  const selectedStage = searchParams.get('stage');
+  const tab = ['Land Preparation', 'Seeding', 'Fertilizer', 'Spray', 'Pesticide', 'Activities', 'Harvesting', 'Sales', 'Timeline'].includes(selectedStage) ? selectedStage : 'Overview';
+  const setTab = value => setSearchParams(current => { const next = new URLSearchParams(current); if (value === 'Overview') next.delete('stage'); else next.set('stage', value); return next; });
   const [editingId, setEditingId] = useState(null);
   const [land, setLand] = useState(null);
   const [generic, setGeneric] = useState(genericBlank);
@@ -41,6 +47,10 @@ export default function CropDashboard() {
     catch (err) { toast.error(err.response?.data?.message || err.message); }
   };
   useEffect(() => { load(); }, [seasonId]);
+  useEffect(() => {
+    setCropSeason?.(data?.season || null);
+    return () => setCropSeason?.(null);
+  }, [data?.season, setCropSeason]);
   const landBlank = season => ({ date: '', activityName: 'Haal / Ploughing', customActivity: '', totalArea: String(season?.totalArea || ''), areaUnit: season?.areaUnit || 'Acre', rounds: '1', hours: '', rateType: 'Per Acre', rate: '', notes: '' });
   useEffect(() => { if (data && !land) setLand(landBlank(data.season)); }, [data, land]);
   const change = set => key => event => set(current => ({ ...current, [key]: event.target.value }));
@@ -79,65 +89,59 @@ export default function CropDashboard() {
   const { season, summary, activities, yields, sales, timeline } = data;
   const landRecords = activities.filter(row => row.type === 'Land Preparation');
   const otherRecords = activities.filter(row => row.type !== 'Land Preparation');
-  const tabs = ['Overview', 'Land Preparation', 'Fertilizer', 'Spray', 'Pesticide', 'Activities', 'Harvesting', 'Sales', 'Timeline'];
+  const tabs = ['Overview', 'Land Preparation', 'Seeding', 'Fertilizer', 'Spray', 'Pesticide', 'Activities', 'Harvesting', 'Sales', 'Timeline'];
   const landPayload = { type: 'Land Preparation', date: land.date, title: land.activityName === 'Other / Custom Activity' ? land.customActivity : land.activityName, quantity: land.totalArea, unit: land.areaUnit, totalCost: landCost, notes: land.notes, details: { activityName: land.activityName === 'Other / Custom Activity' ? land.customActivity : land.activityName, totalArea: land.totalArea, areaUnit: land.areaUnit, rounds: land.rounds, hours: land.hours, rateType: land.rateType, rate: land.rate } };
 
-  return <div className="crop-operations mx-auto max-w-7xl space-y-6">
+  return <div className={`crop-operations mx-auto max-w-7xl space-y-6 ${tab !== 'Overview' ? 'crop-stage-mode' : ''}`}>
     <div className="crop-ops-season-header"><div><div className="crop-ops-season-title"><h1>{season.cropName} {season.season}</h1><span className="crop-ops-status">{season.status}</span></div><p>{[season.variety, `${season.totalArea} ${season.areaUnit}`, season.fieldName].filter(Boolean).join(' / ')}</p></div><Button onClick={() => setTab('Activities')}><span aria-hidden="true">+</span> Add Entry</Button></div>
     <nav className="crop-operation-tabs" aria-label="Crop operations">{tabs.map(item => <Button key={item} variant={tab === item ? 'primary' : 'secondary'} aria-pressed={tab === item} onClick={() => setTab(item)}>{item}</Button>)}</nav>
     {tab === 'Overview' ? <CropOperationsOverview season={season} summary={summary} activities={activities} timeline={timeline} onTab={setTab}/> : null}
-    {tab === 'Land Preparation' ? <div className="space-y-6"><div className="grid grid-cols-1 gap-3 sm:grid-cols-3"><StatCard title="Total land preparation cost" value={money(summary.landPreparation?.totalCost)} /><StatCard title="Cost per acre" value={money(summary.landPreparation?.costPerAcre)} /><StatCard title="Operations" value={summary.landPreparation?.operations || 0} /></div><div className="grid gap-6 xl:grid-cols-[1fr_1.5fr]"><Card><form className="grid gap-4" onSubmit={event => save(event, 'activities', landPayload, () => setLand(landBlank(season)), editingId)}><div className="text-lg font-bold">{editingId ? 'Edit land preparation entry' : 'Add land preparation entry'}</div><Select label="Activity name" value={land.activityName} onChange={change(setLand)('activityName')}>{landActivities.map(item => <option key={item}>{item}</option>)}</Select>{land.activityName === 'Other / Custom Activity' ? <Input label="Custom activity name" value={land.customActivity} onChange={change(setLand)('customActivity')} required /> : null}<Input label="Date" type="date" value={land.date} onChange={change(setLand)('date')} required /><div className="grid grid-cols-2 gap-3"><Input label="Total land area" type="number" min="0" step="0.01" value={land.totalArea} onChange={change(setLand)('totalArea')} required /><Select label="Area unit" value={land.areaUnit} onChange={change(setLand)('areaUnit')}><option>Acre</option><option>Kanal</option><option>Marla</option></Select></div><Select label="Calculation basis" value={land.rateType} onChange={change(setLand)('rateType')}><option>Per Acre</option><option>Per Round</option><option>Per Hour</option><option>Fixed Price</option></Select>{land.rateType === 'Per Round' ? <Input label="Number of rounds" type="number" min="0" step="1" value={land.rounds} onChange={change(setLand)('rounds')} required /> : null}{land.rateType === 'Per Hour' ? <Input label="Number of hours" type="number" min="0" step="0.25" value={land.hours} onChange={change(setLand)('hours')} required /> : null}<Input label={land.rateType === 'Per Hour' ? 'Rate per hour (Rs.)' : land.rateType === 'Per Acre' ? 'Rate per acre (Rs.)' : land.rateType === 'Per Round' ? 'Rate per round (Rs.)' : 'Fixed price (Rs.)'} type="number" min="0" value={land.rate} onChange={change(setLand)('rate')} required /><div className="rounded-xl bg-[#f0faf0] p-4"><div className="text-sm text-[#3a8a3a]">Total cost (automatic)</div><div className="mt-1 text-xl font-bold text-[#001e00]">{money(landCost)}</div></div><Textarea label="Notes" rows="2" value={land.notes} onChange={change(setLand)('notes')} /><div className="flex gap-2"><Button type="submit" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update entry' : 'Save entry'}</Button>{editingId ? <Button type="button" variant="secondary" onClick={() => { setEditingId(null); setLand(landBlank(season)); }}>Cancel</Button> : null}</div></form></Card><Table rows={landRecords} columns={[{ key: 'date', label: 'Date' }, { key: 'title', label: 'Activity' }, { key: 'area', label: 'Area', render: row => `${row.details?.totalArea || 0} ${row.details?.areaUnit || ''}` }, { key: 'usage', label: 'Rounds / hours', render: row => row.details?.rateType === 'Per Hour' ? `${row.details?.hours || 0} hours` : row.details?.rounds || 0 }, { key: 'rateType', label: 'Rate type', render: row => row.details?.rateType || '-' }, { key: 'rate', label: 'Rate (Rs.)', render: row => money(row.details?.rate) }, { key: 'totalCost', label: 'Total (Rs.)', render: row => money(row.totalCost) }, { key: 'actions', label: 'Actions', render: row => <div className="flex gap-2"><Button variant="secondary" onClick={() => viewLand(row)}>View</Button><Button variant="secondary" onClick={() => startEditLand(row)}>Edit</Button><Button variant="danger" onClick={() => deleteRecord('activities', row.id)}>Delete</Button></div> }]} emptyMessage="No land preparation records yet." /></div></div> : null}
-    {tab === 'Fertilizer' ? <FertilizerActivity seasonId={seasonId} activities={activities} summary={summary.fertilizer} onSaved={load} /> : null}
-    {tab === 'Spray' ? <SprayActivity seasonId={seasonId} activities={activities} summary={summary.spray} onSaved={load} /> : null}
-    {tab === 'Pesticide' ? <PesticideActivity seasonId={seasonId} activities={activities} summary={summary.pesticide} onSaved={load} /> : null}
-    {tab === 'Activities' ? <div className="grid gap-6 xl:grid-cols-[1fr_1.4fr]"><Card><form className="grid gap-4" onSubmit={event => save(event, 'activities', { ...generic, details: {} }, () => setGeneric(genericBlank))}><div className="text-lg font-bold">Add crop activity / expense</div><Select label="Section" value={generic.type} onChange={change(setGeneric)('type')}>{activityTypes.map(type => <option key={type}>{type}</option>)}</Select><Input label="Date" type="date" value={generic.date} onChange={change(setGeneric)('date')} required /><Input label="Activity / product" value={generic.title} onChange={change(setGeneric)('title')} required /><div className="grid grid-cols-2 gap-3"><Input label="Quantity" type="number" min="0" value={generic.quantity} onChange={change(setGeneric)('quantity')} /><Input label="Unit" value={generic.unit} onChange={change(setGeneric)('unit')} /></div><Input label="Total cost (Rs.)" type="number" min="0" value={generic.totalCost} onChange={change(setGeneric)('totalCost')} required /><Textarea label="Notes" rows="2" value={generic.notes} onChange={change(setGeneric)('notes')} /><Button type="submit" disabled={saving}>Save activity</Button></form></Card><Table rows={otherRecords} columns={[{ key: 'date', label: 'Date' }, { key: 'type', label: 'Section' }, { key: 'title', label: 'Activity' }, { key: 'quantity', label: 'Quantity', render: row => `${row.quantity || '-'} ${row.unit || ''}` }, { key: 'totalCost', label: 'Cost', render: row => money(row.totalCost) }, { key: 'actions', label: '', render: row => <Button variant="danger" onClick={() => deleteRecord('activities', row.id)}>Delete</Button> }]} emptyMessage="No activity records yet." /></div> : null}
+    {tab === 'Land Preparation' ? <div className="crop-stage-screen">
+      <StageSummary title="Total land preparation cost" value={money(summary.landPreparation?.totalCost)} hint={`Avg ${money(summary.landPreparation?.costPerAcre)} / Acre`} badge={<>{landRecords.length} operations<small>Recorded this season</small></>} />
+      <div className="crop-stage-columns">
+        <StageForm title={editingId ? 'Edit Land Preparation' : 'Quick Land Preparation Log'} icon="Land Preparation" onSubmit={event => save(event, 'activities', landPayload, () => setLand(landBlank(season)), editingId)}>
+          <StageSection title="Operation & Timing"><div className="crop-stage-field-pair"><Select label="Activity name" required value={land.activityName} onChange={change(setLand)('activityName')}>{landActivities.map(item => <option key={item}>{item}</option>)}</Select><Input label="Date" type="date" value={land.date} onChange={change(setLand)('date')} required /></div>{land.activityName === 'Other / Custom Activity' && <Input label="Custom activity name" value={land.customActivity} onChange={change(setLand)('customActivity')} required />}</StageSection>
+          <StageSection title="Area & Calculation"><div className="crop-stage-field-pair"><Input label="Total land area" type="number" min="0" step="0.01" value={land.totalArea} onChange={change(setLand)('totalArea')} required /><Select label="Area unit" value={land.areaUnit} onChange={change(setLand)('areaUnit')}><option>Acre</option><option>Kanal</option><option>Marla</option></Select></div><Select label="Calculation basis" required value={land.rateType} onChange={change(setLand)('rateType')}><option>Per Acre</option><option>Per Round</option><option>Per Hour</option><option>Fixed Price</option></Select>{land.rateType === 'Per Round' && <Input label="Number of rounds" type="number" min="0" step="1" value={land.rounds} onChange={change(setLand)('rounds')} required />}{land.rateType === 'Per Hour' && <Input label="Number of hours" type="number" min="0" step="0.25" value={land.hours} onChange={change(setLand)('hours')} required />}</StageSection>
+          <StageSection title="Cost Summary"><Input label={land.rateType === 'Per Hour' ? 'Rate per hour (Rs.)' : land.rateType === 'Per Acre' ? 'Rate per acre (Rs.)' : land.rateType === 'Per Round' ? 'Rate per round (Rs.)' : 'Fixed price (Rs.)'} type="number" min="0" step="0.01" value={land.rate} onChange={change(setLand)('rate')} required /><StageTotal total={landCost} hint={`${land.rateType} / Calculated automatically`} /></StageSection>
+          <details className="crop-stage-extras"><summary>Additional notes</summary><Textarea label="Notes" rows="2" value={land.notes} onChange={change(setLand)('notes')} /></details>
+          <StageSave saving={saving} editing={editingId} total={landCost} label="Entry" onCancel={() => { setEditingId(null); setLand(landBlank(season)); }} />
+        </StageForm>
+        <StageHistory title="Land preparation history" rows={landRecords} renderSubtitle={row => `${row.details?.totalArea || 0} ${row.details?.areaUnit || ''}`} renderBreakdown={row => `${row.details?.rateType || 'Fixed Price'} / Rate: ${money(row.details?.rate)}`} onView={viewLand} onEdit={startEditLand} onDelete={id => deleteRecord('activities', id)} emptyMessage="No land preparation records yet." />
+      </div>
+    </div> : null}
+    {tab === 'Seeding' ? <SeedingActivity seasonId={seasonId} activities={activities} acres={summary.acres} onSaved={load} /> : null}
+    {tab === 'Fertilizer' ? <FertilizerActivity seasonId={seasonId} activities={activities} summary={summary.fertilizer} acres={summary.acres} onSaved={load} /> : null}
+    {tab === 'Spray' ? <SprayActivity seasonId={seasonId} activities={activities} summary={summary.spray} acres={summary.acres} onSaved={load} /> : null}
+    {tab === 'Pesticide' ? <PesticideActivity seasonId={seasonId} activities={activities} summary={summary.pesticide} acres={summary.acres} onSaved={load} /> : null}
+    {tab === 'Activities' ? <div className="crop-stage-screen">
+      <StageSummary title="Crop activities & expenses" value={money(otherRecords.reduce((sum, row) => sum + Number(row.totalCost || 0), 0))} badge={`${otherRecords.length} entries logged`} />
+      <div className="crop-stage-columns"><StageForm title="Quick Activity Log" onSubmit={event => save(event, 'activities', { ...generic, details: {} }, () => setGeneric(genericBlank))}>
+        <StageSection title="Activity & Timing"><div className="crop-stage-field-pair"><Select label="Section" required value={generic.type} onChange={change(setGeneric)('type')}>{activityTypes.map(type => <option key={type}>{type}</option>)}</Select><Input label="Date" type="date" value={generic.date} onChange={change(setGeneric)('date')} required /></div></StageSection>
+        <StageSection title="Product & Quantity"><Input label="Activity / product" value={generic.title} onChange={change(setGeneric)('title')} required /><div className="crop-stage-field-pair"><Input label="Quantity" type="number" min="0" step="0.01" value={generic.quantity} onChange={change(setGeneric)('quantity')} /><Input label="Unit" value={generic.unit} onChange={change(setGeneric)('unit')} /></div></StageSection>
+        <StageSection title="Cost Summary"><Input label="Total cost (Rs.)" type="number" min="0" step="0.01" value={generic.totalCost} onChange={change(setGeneric)('totalCost')} required /><StageTotal total={generic.totalCost} hint="Activity / expense" /></StageSection>
+        <details className="crop-stage-extras"><summary>Additional notes</summary><Textarea label="Notes" rows="2" value={generic.notes} onChange={change(setGeneric)('notes')} /></details><StageSave saving={saving} total={generic.totalCost} label="Activity" />
+      </StageForm><StageHistory title="Past activity history" rows={otherRecords} renderSubtitle={row => row.type} renderBreakdown={row => `${row.quantity || 0} ${row.unit || ''}`} onDelete={id => deleteRecord('activities', id)} emptyMessage="No activity records yet." /></div>
+    </div> : null}
     {tab === 'Harvesting' ? <HarvestingActivity seasonId={seasonId} yields={yields} summary={summary} onSaved={load} /> : null}
     {tab === 'Sales' ? (() => {
       const { totalKg, kaatKg, finalKg, finalQty } = calcKaat(saleForm.quantitySold, saleForm.unit, saleForm.weightPerBag, saleForm.applyKaat, saleForm.kaatDeductionKg, saleForm.kaatPerKg);
       const grossAmount = finalQty * (Number(saleForm.ratePerUnit) || 0);
-      return <div className="space-y-6">
-        <Card><form className="grid gap-4 md:grid-cols-2" onSubmit={event => save(event, 'sales', { ...saleForm, applyKaat: saleForm.applyKaat }, () => { setSaleForm(saleBlank); setSaleEditingId(null); }, saleEditingId)}>
-          <div className="text-lg font-bold md:col-span-2">{saleEditingId ? 'Edit Crop Sale' : 'Add Crop Sale'}</div>
-          <Input label="Sale date" type="date" value={saleForm.saleDate} onChange={change(setSaleForm)('saleDate')} required />
-          <Input label="Buyer / dealer" value={saleForm.buyerName} onChange={change(setSaleForm)('buyerName')} required />
-          <Select label="Sale unit" value={saleForm.unit} onChange={change(setSaleForm)('unit')}><option>Kg</option><option>Maund</option><option>Ton</option><option>Bags</option></Select>
-          <Input label={saleForm.unit === 'Bags' ? 'Number of bags' : `Quantity (${saleForm.unit})`} type="number" min="0" step="0.01" value={saleForm.quantitySold} onChange={change(setSaleForm)('quantitySold')} required />
-          {saleForm.unit === 'Bags' ? <Input label="Weight per bag (Kg)" type="number" min="0" step="0.01" value={saleForm.weightPerBag} onChange={change(setSaleForm)('weightPerBag')} required /> : null}
-          {saleForm.unit !== 'Kg' && saleForm.quantitySold ? <div className="rounded-xl bg-[#f0faf0] p-3 text-sm text-[#3a8a3a] md:col-span-2">= {totalKg.toLocaleString()} Kg total</div> : null}
-          <Input label={`Rate per ${saleForm.unit} (Rs.)`} type="number" min="0" step="0.01" value={saleForm.ratePerUnit} onChange={change(setSaleForm)('ratePerUnit')} required />
-          <div className="flex items-center gap-3 rounded-xl border border-[#a8d8a8] p-3 md:col-span-2">
-            <input type="checkbox" id="applyKaat" checked={saleForm.applyKaat} onChange={e => setSaleForm(f => ({ ...f, applyKaat: e.target.checked }))} className="h-4 w-4 accent-[#001e00]" />
-            <label htmlFor="applyKaat" className="text-sm font-medium text-[#001e00] cursor-pointer">Apply Kaat / Weight Deduction</label>
-          </div>
-          {saleForm.applyKaat ? <>
-            <Input label="Deduction (Kg)" type="number" min="0.01" step="0.01" value={saleForm.kaatDeductionKg} onChange={change(setSaleForm)('kaatDeductionKg')} />
-            <Input label="Per (Kg)" type="number" min="1" step="1" value={saleForm.kaatPerKg} onChange={change(setSaleForm)('kaatPerKg')} />
-            {totalKg > 0 ? <div className="rounded-xl border border-[#d2b45a] bg-[#fffbf0] p-4 md:col-span-2 space-y-1">
-              <div className="font-bold text-[#001e00] mb-2">Weight Calculation</div>
-              <div className="text-sm text-[#3a8a3a]">Original: <span className="font-semibold text-[#001e00]">{Number(saleForm.quantitySold).toLocaleString()} {saleForm.unit}{saleForm.unit !== 'Kg' ? ` / ${totalKg.toLocaleString()} Kg` : ''}</span></div>
-              <div className="text-sm text-[#3a8a3a]">Kaat rule: <span className="font-semibold text-[#001e00]">{saleForm.kaatDeductionKg} Kg per {saleForm.kaatPerKg} Kg</span></div>
-              <div className="text-sm text-[#3a8a3a]">Total kaat: <span className="font-semibold text-red-600">{kaatKg.toFixed(2)} Kg</span></div>
-              <div className="text-sm font-bold text-[#001e00]">Final weight: {finalKg.toFixed(2)} Kg{saleForm.unit !== 'Kg' ? ` / ${finalQty.toFixed(2)} ${saleForm.unit}` : ''}</div>
-            </div> : null}
-          </> : null}
-          {saleForm.quantitySold && saleForm.ratePerUnit ? <div className="rounded-xl bg-[#001e00] p-4 text-white md:col-span-2">
-            <div className="text-xs text-[#a8d8a8]">Gross Sale Amount</div>
-            <div className="mt-1 text-2xl font-bold">{money(grossAmount)}</div>
-            {saleForm.applyKaat ? <div className="mt-1 text-xs text-[#d2b45a]">Based on {finalQty.toFixed(2)} {saleForm.unit} after kaat</div> : <div className="mt-1 text-xs text-[#a8d8a8]">Based on {Number(saleForm.quantitySold).toLocaleString()} {saleForm.unit} (no kaat)</div>}
-          </div> : null}
-          <Textarea label="Notes" rows="2" value={saleForm.notes} onChange={change(setSaleForm)('notes')} className="md:col-span-2" />
-          <div className="md:col-span-2 flex gap-2"><Button type="submit" disabled={saving}>{saving ? 'Saving...' : saleEditingId ? 'Update sale' : 'Save sale'}</Button>{saleEditingId ? <Button type="button" variant="secondary" onClick={() => { setSaleForm(saleBlank); setSaleEditingId(null); }}>Cancel</Button> : null}</div>
-        </form></Card>
-        <Table rows={sales} columns={[
-          { key: 'saleDate', label: 'Date' },
-          { key: 'buyerName', label: 'Buyer' },
-          { key: 'quantitySold', label: 'Original Qty', render: row => `${Number(row.quantitySold).toLocaleString()} ${row.unit}` },
-          { key: 'kaatKg', label: 'Kaat', render: row => row.applyKaat ? <span className="rounded-full bg-[#fff3cd] px-2 py-0.5 text-xs font-semibold text-[#856404]">{Number(row.kaatKg || 0).toFixed(2)} Kg</span> : <span className="rounded-full bg-[#d6f0d6] px-2 py-0.5 text-xs font-semibold text-[#3a8a3a]">No Kaat</span> },
-          { key: 'finalQty', label: 'Final Weight', render: row => row.applyKaat ? `${Number(row.finalQty || 0).toFixed(2)} ${row.unit}` : `${Number(row.quantitySold).toLocaleString()} ${row.unit}` },
-          { key: 'ratePerUnit', label: 'Rate', render: row => `${money(row.ratePerUnit)}/${row.unit}` },
-          { key: 'netSaleAmount', label: 'Total Amount', render: row => money(row.netSaleAmount) },
-          { key: 'actions', label: '', render: row => <div className="flex gap-2"><Button variant="secondary" onClick={() => startEditSale(row)}>Edit</Button><Button variant="danger" onClick={() => deleteRecord('sales', row.id)}>Delete</Button></div> }
-        ]} emptyMessage="No sales recorded yet." />
+      return <div className="crop-stage-screen">
+        <StageSummary title="Total crop sales" value={money(summary.totalRevenue)} badge={`${sales.length} sales logged`} hint="Recorded sale revenue" />
+        <div className="crop-stage-columns">
+        <StageForm title={saleEditingId ? 'Edit Crop Sale' : 'Quick Sale Log'} icon="finance" onSubmit={event => save(event, 'sales', { ...saleForm, applyKaat: saleForm.applyKaat }, () => { setSaleForm(saleBlank); setSaleEditingId(null); }, saleEditingId)}>
+          <StageSection title="Buyer & Timing"><div className="crop-stage-field-pair"><Input label="Buyer / dealer" value={saleForm.buyerName} onChange={change(setSaleForm)('buyerName')} required /><Input label="Sale date" type="date" value={saleForm.saleDate} onChange={change(setSaleForm)('saleDate')} required /></div></StageSection>
+          <StageSection title="Quantity & Weight"><div className="crop-stage-field-pair"><Select label="Sale unit" required value={saleForm.unit} onChange={change(setSaleForm)('unit')}><option>Kg</option><option>Maund</option><option>Ton</option><option>Bags</option></Select><Input label={saleForm.unit === 'Bags' ? 'Number of bags' : `Quantity (${saleForm.unit})`} type="number" min="0" step="0.01" value={saleForm.quantitySold} onChange={change(setSaleForm)('quantitySold')} required /></div>{saleForm.unit === 'Bags' && <Input label="Weight per bag (Kg)" type="number" min="0" step="0.01" value={saleForm.weightPerBag} onChange={change(setSaleForm)('weightPerBag')} required />}
+            <div className="crop-stage-kaat"><input type="checkbox" id="applyKaat" checked={saleForm.applyKaat} onChange={e => setSaleForm(f => ({ ...f, applyKaat: e.target.checked }))} /><label htmlFor="applyKaat">Apply Kaat / Weight Deduction</label></div>
+            {saleForm.applyKaat && <><div className="crop-stage-field-pair"><Input label="Deduction (Kg)" type="number" min="0.01" step="0.01" value={saleForm.kaatDeductionKg} onChange={change(setSaleForm)('kaatDeductionKg')} /><Input label="Per (Kg)" type="number" min="1" step="1" value={saleForm.kaatPerKg} onChange={change(setSaleForm)('kaatPerKg')} /></div>{totalKg > 0 && <div className="crop-stage-weight-summary"><span>Original: {totalKg.toLocaleString()} Kg</span><span>Kaat: {kaatKg.toFixed(2)} Kg</span><strong>Final: {finalKg.toFixed(2)} Kg / {finalQty.toFixed(2)} {saleForm.unit}</strong></div>}</>}
+            {!saleForm.applyKaat && saleForm.unit !== 'Kg' && Number(saleForm.quantitySold) > 0 && <div className="crop-stage-weight-summary">{totalKg.toLocaleString()} Kg total</div>}
+          </StageSection>
+          <StageSection title="Sale Summary"><Input label={`Rate per ${saleForm.unit} (Rs.)`} type="number" min="0" step="0.01" value={saleForm.ratePerUnit} onChange={change(setSaleForm)('ratePerUnit')} required /><StageTotal total={grossAmount} hint={`Sale amount / ${finalQty.toFixed(2)} ${saleForm.unit}${saleForm.applyKaat ? ' after kaat' : ''}`} /></StageSection>
+          <details className="crop-stage-extras"><summary>Additional notes</summary><Textarea label="Notes" rows="2" value={saleForm.notes} onChange={change(setSaleForm)('notes')} /></details>
+          <StageSave saving={saving} editing={saleEditingId} label="Sale" onCancel={() => { setSaleForm(saleBlank); setSaleEditingId(null); }} />
+        </StageForm>
+        <StageHistory title="Past sales history" rows={sales.map(row => ({ ...row, date: row.saleDate, title: row.buyerName }))} renderSubtitle={row => `Sold ${Number(row.quantitySold || 0).toLocaleString()} ${row.unit}`} renderBreakdown={row => `${money(row.ratePerUnit)} / ${row.unit}${row.applyKaat ? ` / Kaat: ${Number(row.kaatKg || 0).toFixed(2)} Kg` : ''}`} renderAmount={row => money(row.netSaleAmount)} onEdit={startEditSale} onDelete={id => deleteRecord('sales', id)} emptyMessage="No sales recorded yet." />
+        </div>
       </div>;
     })() : null}
     {tab === 'Timeline' ? <Card><div className="space-y-4">{timeline.length ? timeline.map(item => <div key={`${item.type}-${item.id}`} className="border-l-2 border-[#a8d8a8] pl-4"><div className="text-xs font-semibold text-[#d2b45a]">{item.date}</div><div className="font-semibold text-[#001e00]">{item.title}</div><div className="text-sm text-[#3a8a3a]">{item.type}{item.detail ? ` · ${item.detail}` : ''}</div></div>) : <div className="py-8 text-center text-[#3a8a3a]">Your crop history will appear here as you add records.</div>}</div></Card> : null}
