@@ -84,12 +84,15 @@ function MobileAnimalCard({ animal, onOpen, onEdit, onDelete }) {
 
 export default function Animals() {
   const [animals, setAnimals] = useState([]);
+  const [registeredAnimals, setRegisteredAnimals] = useState([]);
+  const availableTypes = [...new Set(registeredAnimals.map(animal => animal.type).filter(Boolean))];
   const [filters, setFilters] = useState({ q: '', type: '', gender: '', status: '' });
   const navigate = useNavigate();
 
   const load = async params => {
     const res = await api.get('/animals', { params });
     setAnimals(res.data.animals);
+    if (!params || !Object.values(params).some(Boolean)) setRegisteredAnimals(res.data.animals);
   };
 
   useEffect(() => {
@@ -103,7 +106,11 @@ export default function Animals() {
     try {
       await api.delete(`/animals/${id}`);
       toast.success('Animal deleted successfully.');
-      load(filters);
+      const all = await api.get('/animals');
+      setRegisteredAnimals(all.data.animals);
+      const next = all.data.animals.some(a => a.type === filters.type) ? filters : { ...filters, type: '' };
+      setFilters(next);
+      load(next);
     } catch (err) {
       Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || err.message, confirmButtonColor: '#001e00' });
     }
@@ -152,7 +159,7 @@ export default function Animals() {
     <div className="space-y-6">
       <div className="animals-mobile-directory md:hidden">
         <div className="animals-mobile-search"><span>⌕</span><input value={filters.q} onChange={searchMobile} onKeyDown={event => { if (event.key === 'Enter') apply(); }} placeholder="Search by Tag ID or Breed..." /></div>
-        <div className="animals-mobile-chips"><button className={!filters.type ? 'active' : ''} onClick={() => setMobileType('')}>All Animals</button><button className={filters.type === 'Cow' ? 'active' : ''} onClick={() => setMobileType('Cow')}>Cows</button><button className={filters.type === 'Goat' ? 'active' : ''} onClick={() => setMobileType('Goat')}>Goats</button><button className={filters.type === 'Sheep' ? 'active' : ''} onClick={() => setMobileType('Sheep')}>Sheeps</button></div>
+        <div className="animals-mobile-chips"><button className={!filters.type ? 'active' : ''} onClick={() => setMobileType('')}>All Animals</button>{availableTypes.map(type => <button key={type} className={filters.type === type ? 'active' : ''} onClick={() => setMobileType(type)}>{({ Cow: 'Cows', Goat: 'Goats', Sheep: 'Sheeps', Buffalo: 'Buffaloes' })[type] || type}</button>)}</div>
         <div className="flex items-center justify-between"><h1>Livestock Directory</h1><span>{animals.length} Total</span></div>
         <div className="animals-mobile-list">{animals.length ? animals.map(animal => <MobileAnimalCard key={animal.id} animal={animal} onOpen={() => navigate(`/farm/animals/${animal.id}`)} onEdit={() => navigate(`/farm/animals/${animal.id}`)} onDelete={() => remove(animal.id)} />) : <div className="py-12 text-center text-sm text-[#6a8277]">No animals found.</div>}</div>
         <button className="animals-mobile-fab" onClick={() => navigate('/farm/animals/new')} aria-label="Add animal">+</button>
@@ -180,9 +187,7 @@ export default function Animals() {
           </div>
           <Select label="Type" value={filters.type} onChange={e => setFilters({ ...filters, type: e.target.value })}>
             <option value="">All</option>
-            <option value="Cow">Cow</option>
-            <option value="Goat">Goat</option>
-            <option value="Sheep">Sheep</option>
+            {availableTypes.map(type => <option key={type} value={type}>{type}</option>)}
           </Select>
           <Select label="Gender" value={filters.gender} onChange={e => setFilters({ ...filters, gender: e.target.value })}>
             <option value="">All</option>

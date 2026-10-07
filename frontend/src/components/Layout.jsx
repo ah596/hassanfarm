@@ -44,15 +44,15 @@ const navGroups = [
     label: 'Crops',
     prefix: '/crops',
     items: [
-      { to: '/crops', label: 'Crop Management' },
-      { to: '/crops/reports', label: 'Crop Reports' },
+      { to: '/crops', label: 'Crop Management', icon: 'feed' },
+      { to: '/crops/reports', label: 'Crop Reports', icon: 'reports' },
     ]
   },
   {
     label: 'Dairy',
     prefix: '/dairy',
     items: [
-      { to: '/dairy', label: 'Milk Suppliers' }
+      { to: '/dairy', label: 'Milk Suppliers', icon: 'animals' }
     ]
   }
 ];
@@ -65,9 +65,9 @@ export function AppLayout() {
   const headerRef = useRef(null);
   const closeMobileMenu = () => setMobileMenuOpen(false);
   const activeGroup = navGroups.find(g => location.pathname.startsWith(g.prefix)) || navGroups[0];
-  const otherGroup = navGroups.find(g => g.label !== activeGroup.label);
   const isHome = location.pathname === activeGroup.items[0].to && !location.search;
   const isFarmSection = activeGroup.label === 'Farm';
+  const isCropOperations = /^\/crops\/[^/]+$/.test(location.pathname) && location.pathname !== '/crops/reports';
   const isFarmDashboard = location.pathname === '/farm' && !location.search;
   const handleBack = () => location.search ? navigate(location.pathname, { replace: true }) : navigate(-1);
 
@@ -94,7 +94,7 @@ export function AppLayout() {
   }, [mobileMenuOpen]);
 
   return (
-    <div className={`min-h-screen bg-[#f4f7f4] text-[#001e00] ${isFarmSection ? 'farm-app-shell' : ''} ${isFarmDashboard ? 'farm-dashboard-shell' : ''}`}>
+    <div className={`min-h-screen bg-[#f4f7f4] text-[#001e00] app-navigation-shell ${isFarmSection ? 'farm-app-shell' : ''} ${isFarmDashboard ? 'farm-dashboard-shell' : ''}`}>
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
 
         {/* Sidebar */}
@@ -110,7 +110,7 @@ export function AppLayout() {
             </Link>
 
             {/* Nav */}
-            <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <nav className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {/* Active group label */}
               <div className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#d2b45a]/60">{activeGroup.label}</div>
               {activeGroup.items.map(item => (
@@ -128,37 +128,20 @@ export function AppLayout() {
                   <span className="farm-nav-item"><NavIcon name={item.icon} />{item.label}</span>
                 </NavLink>
               ))}
-              {/* Switch to other module */}
-              <div className="mt-4">
-                <button
-                  onClick={() => navigate(otherGroup.items[0].to)}
-                  className="flex w-full items-center justify-between rounded-xl border border-white/10 px-3.5 py-2.5 text-sm font-medium text-[#a8d8a8] transition hover:bg-white/10 hover:text-white"
-                >
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#d2b45a]/60">{otherGroup.label}</span>
-                  <span className="text-xs">Switch →</span>
-                </button>
-                {activeGroup.label !== 'Dairy' ? (
-                  <button
-                    onClick={() => navigate('/dairy')}
-                    className="mt-2 flex w-full items-center justify-between rounded-xl border border-white/10 px-3.5 py-2.5 text-sm font-medium text-[#a8d8a8] transition hover:bg-white/10 hover:text-white"
-                  >
-                    <span>Dairy</span><span className="text-xs">Switch</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => navigate('/crops')}
-                    className="mt-2 flex w-full items-center justify-between rounded-xl border border-white/10 px-3.5 py-2.5 text-sm font-medium text-[#a8d8a8] transition hover:bg-white/10 hover:text-white"
-                  >
-                    <span>Crops</span><span className="text-xs">Switch</span>
-                  </button>
-                )}
-              </div>
             </nav>
 
             {/* User panel */}
-            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="mt-4 shrink-0 rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="text-xs text-[#d2b45a]">Signed in as</div>
               <div className="mt-1 truncate text-sm font-semibold text-white">{user?.displayName || user?.email || 'User'}</div>
+              <div className="module-switch-links mt-3 grid gap-2" aria-label="Modules">
+                {navGroups.map(group => (
+                  <NavLink key={group.prefix} to={group.prefix}
+                    className={() => `flex items-center justify-between rounded-xl border border-white/20 px-3 py-2 text-xs font-medium transition hover:bg-white/10 ${activeGroup.label === group.label ? 'bg-[#d2b45a] text-[#001e00]' : 'text-[#a8d8a8]'}`}>
+                    <span>{group.label}</span><span>{activeGroup.label === group.label ? 'Active' : 'Switch'}</span>
+                  </NavLink>
+                ))}
+              </div>
               <button
                 onClick={logout}
                 className="mt-3 w-full rounded-xl border border-white/20 py-2 text-xs font-medium text-[#a8d8a8] transition hover:bg-white/10 hover:text-white"
@@ -172,7 +155,7 @@ export function AppLayout() {
         {/* Main */}
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header ref={headerRef} className={`sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-3 py-3 sm:px-5 sm:py-4 ${isFarmDashboard ? 'farm-layout-header' : ''}`}>
+          <header ref={headerRef} className={`sticky top-0 z-20 border-b border-[#a8d8a8] bg-white px-3 py-3 sm:px-5 sm:py-4 farm-layout-header`}>
             <div className="flex items-center justify-between gap-3">
 
               {/* Left: back arrow + breadcrumb + page title */}
@@ -199,7 +182,7 @@ export function AppLayout() {
                   </div>
                   {/* page title */}
                   <div className="truncate text-sm font-bold text-[#001e00] sm:text-base lg:text-lg">
-                    {isFarmDashboard
+                    {isCropOperations ? 'Crops Operations' : isFarmDashboard
                       ? 'Dashboard'
                       : activeGroup.items.find(i => i.to !== activeGroup.items[0].to && location.pathname.startsWith(i.to))?.label
                         || activeGroup.items.find(i => i.to === location.pathname)?.label
@@ -223,27 +206,13 @@ export function AppLayout() {
                 <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-[#001e00] text-[10px] font-bold text-white ${isFarmDashboard ? 'hidden lg:flex' : ''}`}>
                   {(user?.displayName || user?.email || 'U').slice(0, 2).toUpperCase()}
                 </div>
-                {/* hamburger — mobile only */}
-                <button
-                  type="button"
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg border border-[#a8d8a8] text-[#001e00] transition hover:bg-[#d6f0d6] lg:hidden ${isFarmDashboard ? 'hidden' : ''}`}
-                  onClick={() => setMobileMenuOpen(o => !o)}
-                  aria-label="Toggle navigation menu"
-                  aria-expanded={mobileMenuOpen}
-                >
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                    {mobileMenuOpen
-                      ? <path d="M4 4l12 12M16 4 4 16"/>
-                      : <path d="M3 6h14M3 10h14M3 14h14"/>}
-                  </svg>
-                </button>
               </div>
             </div>
 
             {/* Mobile menu */}
             {mobileMenuOpen ? (
               <div className="farm-mobile-sidebar lg:hidden">
-                <nav className="grid gap-0.5">
+                <nav className="grid min-h-0 flex-1 content-start gap-0.5 overflow-y-auto">
                   <div className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#d2b45a]">{activeGroup.label}</div>
                   {activeGroup.items.map(item => (
                     <NavLink
@@ -261,29 +230,23 @@ export function AppLayout() {
                       {item.label}
                     </NavLink>
                   ))}
-                  <button
-                    onClick={() => { navigate(otherGroup.items[0].to); closeMobileMenu(); }}
-                    className="mt-2 flex w-full items-center justify-between rounded-xl border border-[#a8d8a8] px-3.5 py-2.5 text-sm font-medium text-[#3a8a3a] hover:bg-[#d6f0d6]"
-                  >
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{otherGroup.label}</span>
-                    <span className="text-xs">Switch →</span>
-                  </button>
-                  {activeGroup.label !== 'Dairy' ? (
-                    <button onClick={() => { navigate('/dairy'); closeMobileMenu(); }} className="flex w-full items-center justify-between rounded-xl border border-[#a8d8a8] px-3.5 py-2.5 text-sm font-medium text-[#3a8a3a] hover:bg-[#d6f0d6]">
-                      <span>Dairy</span><span className="text-xs">Switch</span>
-                    </button>
-                  ) : (
-                    <button onClick={() => { navigate('/crops'); closeMobileMenu(); }} className="flex w-full items-center justify-between rounded-xl border border-[#a8d8a8] px-3.5 py-2.5 text-sm font-medium text-[#3a8a3a] hover:bg-[#d6f0d6]">
-                      <span>Crops</span><span className="text-xs">Switch</span>
-                    </button>
-                  )}
                 </nav>
+                <div className="shrink-0 pt-3">
+                  <div className="grid gap-2" aria-label="Modules">
+                    {navGroups.map(group => (
+                      <NavLink key={group.prefix} to={group.prefix} onClick={closeMobileMenu}
+                        className={() => `flex items-center justify-between rounded-xl border border-white/20 px-3.5 py-2 text-sm font-medium ${activeGroup.label === group.label ? 'bg-[#d2b45a] text-[#001e00]' : 'text-[#c8ddcf] hover:bg-white/10'}`}>
+                        <span>{group.label}</span><span className="text-xs">{activeGroup.label === group.label ? 'Active' : 'Switch'}</span>
+                      </NavLink>
+                    ))}
+                  </div>
                 <button
                   onClick={logout}
                   className="mt-3 w-full rounded-xl bg-[#001e00] py-2.5 text-sm font-medium text-white transition hover:bg-[#0f3d0f]"
                 >
                   Logout
                 </button>
+                </div>
               </div>
             ) : null}
           </header>
@@ -293,19 +256,25 @@ export function AppLayout() {
           </div>
 
           {/* Footer */}
-          <footer className={`bg-[#001e00] px-6 py-5 ${isFarmSection ? 'farm-layout-footer' : ''}`}>
+          <footer className={`bg-[#001e00] px-6 py-5 farm-layout-footer`}>
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm font-semibold text-white">© 2024 Maweshi Farm Management. Track animals, expenses &amp; profit in one place.</div>
               <div className="farm-footer-links"><span>Support</span><span>Privacy Policy</span><span>Terms</span></div>
             </div>
           </footer>
-          {isFarmSection ? <nav className="farm-mobile-tabs" aria-label="Farm navigation">
-            <NavLink to="/farm" end><NavIcon name="dashboard"/><span>Home</span></NavLink>
-            <NavLink to="/farm/animals"><NavIcon name="animals"/><span>Animals</span></NavLink>
-            <NavLink to="/farm/animals/new"><NavIcon name="add"/><span>Add</span></NavLink>
-            <NavLink to="/farm/expenses"><NavIcon name="expenses"/><span>Finance</span></NavLink>
+          <nav className="farm-mobile-tabs" aria-label={`${activeGroup.label} navigation`} style={isFarmSection ? undefined : { gridTemplateColumns: `repeat(${activeGroup.items.length + 1}, 1fr)` }}>
+            {isFarmSection ? <>
+            <NavLink to="/farm" end onClick={closeMobileMenu}><NavIcon name="dashboard"/><span>Home</span></NavLink>
+            <NavLink to="/farm/animals" onClick={closeMobileMenu}><NavIcon name="animals"/><span>Animals</span></NavLink>
+            <NavLink to="/farm/animals/new" onClick={closeMobileMenu}><NavIcon name="add"/><span>Add</span></NavLink>
+            <NavLink to="/farm/expenses" onClick={closeMobileMenu}><NavIcon name="expenses"/><span>Finance</span></NavLink>
+            </> : activeGroup.items.map(item => (
+              <NavLink key={item.to} to={item.to} end={item.to === activeGroup.prefix} onClick={closeMobileMenu}>
+                <NavIcon name={item.icon}/><span>{item.label}</span>
+              </NavLink>
+            ))}
             <button type="button" onClick={() => setMobileMenuOpen(open => !open)} aria-label="Toggle navigation menu" aria-expanded={mobileMenuOpen}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d={mobileMenuOpen ? "M4 4l12 12M16 4 4 16" : "M3 6h14M3 10h14M3 14h14"}/></svg><span>Menu</span></button>
-          </nav> : null}
+          </nav>
         </main>
       </div>
     </div>

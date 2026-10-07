@@ -220,7 +220,7 @@ export default function AnimalDetails() {
           <label>Animal tag / ID<input value={form.animalId} onChange={e => setForm({ ...form, animalId: e.target.value })} required /></label>
           <label>Animal name<input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></label>
           <label>Animal category</label>
-          <div className="animal-edit-type-grid">{['Cow', 'Goat', 'Sheep', 'Buffalo'].map(type => <button type="button" key={type} className={form.type === type ? 'selected' : ''} onClick={() => setForm({ ...form, type })}><span>{type === 'Cow' ? '♣' : type === 'Goat' ? '♧' : type === 'Sheep' ? '✦' : '●'}</span>{type}</button>)}</div>
+          <div className="animal-edit-type-grid">{['Cow', 'Goat', 'Sheep', 'Buffalo'].map(type => <button type="button" key={type} className={form.type === type ? 'selected' : ''} onClick={() => setForm({ ...form, type })}><span className={`animal-type-png ${type === "Goat" || type === "Sheep" ? "animal-type-png-small" : ""}`} style={{ "--animal-icon": `url(/animal-icons/${type.toLowerCase()}.png)` }} aria-hidden="true" />{type}</button>)}</div>
           <label>Gender</label>
           <div className="animal-edit-choice-row"><button type="button" className={form.gender === 'Female' ? 'selected' : ''} onClick={() => setForm({ ...form, gender: 'Female' })}>♀ Female (Dam)</button><button type="button" className={form.gender === 'Male' ? 'selected' : ''} onClick={() => setForm({ ...form, gender: 'Male' })}>♂ Male (Sire)</button></div>
           <div className="animal-edit-two-col"><label>Breed<input value={form.breed} onChange={e => setForm({ ...form, breed: e.target.value })} required /></label><label>Color pattern<input value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} /></label></div>
@@ -234,7 +234,7 @@ export default function AnimalDetails() {
 
         <section className="animal-edit-section">
           <h2>Acquisition &amp; lineage</h2>
-          <div className="animal-edit-self"><div><b>Self breed (born on farm)</b><small>Hide purchase fields when this animal was born here.</small></div><input type="checkbox" checked={form.isSelfBreed} onChange={e => setForm({ ...form, isSelfBreed: e.target.checked })} /></div>
+          <div className="animal-edit-self"><div><b>Self breed (born on farm)</b><small>Hide purchase fields when this animal was born here.</small></div><input type="checkbox" className="self-breed-png-toggle" aria-label="Self Breed (Born on farm)" checked={form.isSelfBreed} onChange={e => setForm({ ...form, isSelfBreed: e.target.checked })} /></div>
           {!form.isSelfBreed ? <div className="animal-edit-two-col"><label>Purchase date<input type="date" value={form.purchaseDate} onChange={e => setForm({ ...form, purchaseDate: e.target.value })} /></label><label>Purchase price (Rs.)<input type="number" min="0" value={form.purchasePrice} onChange={e => setForm({ ...form, purchasePrice: e.target.value })} /></label><label>Seller name<input value={form.sellerName} onChange={e => setForm({ ...form, sellerName: e.target.value })} /></label><label>Seller contact<input value={form.sellerContact} onChange={e => setForm({ ...form, sellerContact: e.target.value })} /></label></div> : null}
         </section>
 

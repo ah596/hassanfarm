@@ -24,6 +24,7 @@ function pregnancyProgress(type, remainingDays) {
 export default function Pregnancy() {
   const [animals, setAnimals] = useState([]);
   const [selectedId, setSelectedId] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [addForm, setAddForm] = useState({ breedingDate: '', pregnancyNumber: '1', notes: '' });
   // activePanel: { recordId, type: 'outcome' | 'edit' } — only one open at a time
   const [activePanel, setActivePanel] = useState(null);
@@ -34,12 +35,14 @@ export default function Pregnancy() {
   const [error, setError] = useState('');
 
   const eligibleAnimals = useMemo(() => animals.filter(a => a.gender === 'Female' && GESTATION_DAYS[a.type]), [animals]);
+  const availableTypes = [...new Set(animals.map(animal => animal.type).filter(Boolean))];
+  const filterAnimals = eligibleAnimals.filter(a => !typeFilter || a.type === typeFilter);
   const selectedAnimal = eligibleAnimals.find(a => a.id === selectedId) || null;
-  const shownAnimals = selectedAnimal ? [selectedAnimal] : eligibleAnimals;
+  const shownAnimals = selectedAnimal ? [selectedAnimal] : filterAnimals;
   const pregnancyAnimals = useMemo(() => {
     const nextDue = a => Math.min(...(a.breedingHistory || []).filter(r => Number.isFinite(r.remainingDays)).map(r => r.remainingDays), Infinity);
-    return shownAnimals.filter(a => a.breedingHistory?.length).sort((a, b) => nextDue(a) - nextDue(b));
-  }, [shownAnimals]);
+    return shownAnimals.filter(a => a.breedingHistory?.length && (!typeFilter || a.type === typeFilter)).sort((a, b) => nextDue(a) - nextDue(b));
+  }, [shownAnimals, typeFilter]);
   const estimate = getEstimate(selectedAnimal?.type, addForm.breedingDate);
 
   useEffect(() => {
@@ -172,13 +175,22 @@ export default function Pregnancy() {
 
       <Card className="pregnancy-filter-card">
         <Select label="Filter by Female Animal" value={selectedId} onChange={e => { setSelectedId(e.target.value); setActivePanel(null); setError(''); }}>
-          <option value="">All saved animals</option>
-          {eligibleAnimals.map(a => <option key={a.id} value={a.id}>{a.animalId} — {a.name || a.breed} ({a.type})</option>)}
+          <option value="">{typeFilter ? `All saved ${typeFilter === 'Cow' ? 'cows' : typeFilter === 'Goat' ? 'goats' : typeFilter === 'Buffalo' ? 'buffaloes' : typeFilter.toLowerCase()}` : 'All saved animals'}</option>
+          {filterAnimals.map(a => <option key={a.id} value={a.id}>{a.animalId} — {a.name || a.breed} ({a.type})</option>)}
         </Select>
-        {!eligibleAnimals.length ? <div className="mt-3 text-sm text-[#B3B3B3]">No female cows, goats, or sheep have been saved yet.</div> : null}
+        {!filterAnimals.length ? <div className="mt-3 text-sm text-[#B3B3B3]">{typeFilter ? `No female ${typeFilter.toLowerCase()} animals have been saved yet.` : 'No female cows, goats, or sheep have been saved yet.'}</div> : null}
       </Card>
 
-      <Card className="pregnancy-records-card">
+      <div className="animals-mobile-chips md:hidden" aria-label="Filter pregnancy records by animal type">
+        {[['', 'All Animals'], ...availableTypes.map(type => [type, ({ Cow: 'Cows', Goat: 'Goats', Sheep: 'Sheeps', Buffalo: 'Buffaloes' })[type] || type])].map(([type, label]) => (
+          <button key={type} type="button" className={typeFilter === type ? 'active' : ''} aria-pressed={typeFilter === type}
+            onClick={() => { setTypeFilter(type); setSelectedId(''); setActivePanel(null); setError(''); }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="pregnancy-records-card">
         <div className="pregnancy-records-heading"><div className="text-lg font-bold text-[#2B2B2B]">Saved Pregnancy Records</div><span>{pregnancyAnimals.reduce((sum, animal) => sum + (animal.breedingHistory?.length || 0), 0)} Active</span></div>
         <div className="space-y-5">
           {pregnancyAnimals.length ? pregnancyAnimals.map(animal => (
@@ -210,7 +222,7 @@ export default function Pregnancy() {
                         </div>
                       </div>
                       <div className="pregnancy-reference-progress"><div><b>✦ TRIMESTER {Math.min(3, Math.max(1, Math.ceil(((GESTATION_DAYS[animal.type] || 1) - Math.max(0, Number(record.remainingDays) || 0)) / ((GESTATION_DAYS[animal.type] || 1) / 3))))}</b><span>{record.remainingDays > 0 ? `${record.remainingDays}d left` : 'Due today'}</span></div></div>
-                      <div className="pregnancy-progress" style={{ '--pregnancy-progress': `${pregnancyProgress(animal.type, record.remainingDays)}%` }}><i style={{ width: `${pregnancyProgress(animal.type, record.remainingDays)}%` }} /><span>{Math.max(0, (GESTATION_DAYS[animal.type] || 0) - Math.max(0, Number(record.remainingDays) || 0))}D</span></div>
+                      <div className="pregnancy-progress" style={{ '--pregnancy-progress': `${pregnancyProgress(animal.type, record.remainingDays)}%` }}><i style={{ width: `${pregnancyProgress(animal.type, record.remainingDays)}%` }} /><span className={Number(record.remainingDays) <= 36 ? "pregnancy-days-before-node" : undefined}>{Math.max(0, (GESTATION_DAYS[animal.type] || 0) - Math.max(0, Number(record.remainingDays) || 0))}D</span></div>
                       <div className="pregnancy-mobile-exact-dates"><div><span>BREEDING DATE</span><b>{displayDate(record.breedingDate)}</b></div><div><span>◫ DUE DATE</span><b>{displayDate(record.expectedBirthDate)}</b></div><div><span>ACTUAL BIRTH</span><b>{record.outcome ? displayDate(record.outcomeDate) : displayDate(record.actualBirthDate)}</b></div></div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="rounded-xl bg-white p-1.5"><div className="text-[9px] font-bold uppercase tracking-wide text-[#3a8a3a]">Breeding Date</div><div className="mt-0.5 font-bold text-[#001e00]">{displayDate(record.breedingDate)}</div></div>
@@ -272,12 +284,12 @@ export default function Pregnancy() {
             </div>
           )) : <div className="text-sm text-[#B3B3B3]">{selectedAnimal ? 'No pregnancy records for this animal yet.' : 'No saved pregnancy records yet.'}</div>}
         </div>
-      </Card>
+      </div>
 
-      <button type="button" className="pregnancy-mobile-log md:hidden" onClick={() => {
+      <button type="button" className="pregnancy-mobile-log md:hidden" aria-label="Log Insemination" title="Log Insemination" onClick={() => {
         if (!selectedAnimal) { toast('Select a female animal first.'); return; }
         document.getElementById('pregnancy-add-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }}>⊕ &nbsp; Log Insemination</button>
+      }}>+</button>
 
       {selectedAnimal ? (
         <Card className="pregnancy-add-card" id="pregnancy-add-form">
