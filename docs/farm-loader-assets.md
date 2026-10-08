@@ -1,8 +1,19 @@
 # Farm grazing loader assets
 
-Generated with the built-in Imagegen tool using the user's grazing cow illustration as a visual reference. Browser canvas encoding converts the final images to WebP for delivery; it preserves the cow's transparency. Movement is rendered in the application with separate head, jaw, body and tail layers.
+## Current PNG animation
 
-Final assets:
+The current loader uses the two original PNG files supplied by the user, copied without modifying their image data:
+
+- `frontend/public/loading/animal.png`
+- `frontend/public/loading/grass.png`
+
+The cow bends its head toward the grass, chews, and gently shifts its body. The grass sways around its base. SVG layers keep the head and jaw connected; the illustration remains still when reduced motion is requested. Existing Farm request handling controls when the loader appears.
+
+## Earlier illustrated version
+
+The previous assets below were generated with the built-in Imagegen tool from the user's earlier grazing cow illustration. They are retained as earlier artwork and are no longer rendered by the loader. Browser canvas encoding converted them to WebP for delivery.
+
+Earlier assets:
 
 - `frontend/public/loading/grazing-cow-v2.webp`
 - `frontend/public/loading/pasture-v2.webp`
