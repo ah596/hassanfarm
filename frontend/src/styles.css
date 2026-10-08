@@ -983,7 +983,7 @@ main:has(.crop-operations),
 .cow-loader-panel { min-height: 300px; padding: 24px 16px; border: 1px solid #dce6d6; border-radius: 14px; background: #fffdf8; }
 .cow-loader-full-page { min-height: 100dvh; border: 0; border-radius: 0; }
 .cow-loader-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(255,253,248,.96); padding: 20px; }
-.farm-app-shell:has(.cow-loader-panel) > .cow-loader-overlay { display: none; }
+.farm-app-shell:has(.cow-loader-panel, .farm-layout-content .cow-loader-overlay) > .cow-loader-overlay { display: none; }
 .cow-loader-content { display: grid; justify-items: center; max-width: 100%; }
 .cow-loader-scene { display: block; width: min(360px,82vw); max-width: 100%; height: auto; overflow: hidden; }
 .cow-loader-label { margin: 16px 0 0; color: #244c3a; font-size: 14px; line-height: 21px; font-weight: 600; text-align: center; }
