@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import api from '../lib/api';
-import { Button, Card, Input, SectionHeader, Select, Textarea, LoadingState } from '../components/ui';
+import { Button, Card, Input, SectionHeader, Select, Textarea } from '../components/ui';
+import CowLoader from '../components/CowLoader';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 
@@ -167,7 +168,7 @@ export default function Pregnancy() {
     );
   };
 
-  if (loading) return <LoadingState variant="farm" label="Loading saved pregnancy records..." />;
+  if (loading) return <CowLoader label="Loading saved pregnancy records..." overlay />;
 
   return (
     <div className="pregnancy-page space-y-6">

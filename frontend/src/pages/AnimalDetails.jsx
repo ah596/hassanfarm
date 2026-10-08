@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
-import { Button, Card, Input, Select, SectionHeader, Textarea, LoadingState } from '../components/ui';
+import { Button, Card, Input, Select, SectionHeader, Textarea } from '../components/ui';
+import CowLoader from '../components/CowLoader';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
@@ -132,7 +133,7 @@ export default function AnimalDetails() {
     }
   };
 
-  if (loading) return <LoadingState variant="farm" label="Loading animal profile..." />;
+  if (loading) return <CowLoader label="Loading animal profile..." overlay />;
   if (error) return <Card><div className="text-[#2B2B2B]">{error}</div></Card>;
   if (!animal) return null;
 
